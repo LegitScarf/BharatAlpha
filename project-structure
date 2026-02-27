@@ -1,0 +1,115 @@
+Project Name:        BharatAlpha
+LLM Provider:        Anthropic (Claude only, no OpenAI)
+Fast agents:         claude-haiku-4-5-20251001
+Reasoning agents:    claude-sonnet-4-5-20251014
+Order Placement:     Excluded (v2 feature)
+Universe Scope:      Nifty 500, sector-filtered
+Data Sources:        Angel One, Screener.in, NSE/BSE, RSS feeds
+Pipeline:            8 agents, sequential, CrewAI
+Frontend:            Streamlit, white trading terminal aesthetic
+Infrastructure:      Docker + Jenkins + AWS (mirrors OptiTrade)
+
+
+Agent                       Model       Task                    Output File
+─────────────────────────────────────────────────────────────────────────────
+market_context_agent        Haiku       analyze_market_context  market_context.json
+stock_screener_agent        Haiku       screen_universe         screened_stocks.json
+fundamental_analyst_agent   Sonnet      analyze_fundamentals    fundamental_analysis.json
+technical_analyst_agent     Haiku       analyze_technicals      technical_analysis.json
+sentiment_analyst_agent     Haiku       assess_sentiment        sentiment_analysis.json
+risk_analyst_agent          Haiku       evaluate_risk           risk_analysis.json
+portfolio_manager_agent     Sonnet      construct_portfolio     portfolio_construction.json
+report_generator_agent      Sonnet      generate_report         investment_research_report.md
+
+
+
+BharatAlpha/
+│
+├── config/
+│   ├── agents.yaml
+│   ├── tasks.yaml
+│   └── universe.yaml
+│
+├── output/
+│   ├── market_context.json
+│   ├── screened_stocks.json
+│   ├── fundamental_analysis.json
+│   ├── technical_analysis.json
+│   ├── sentiment_analysis.json
+│   ├── risk_analysis.json
+│   ├── portfolio_construction.json
+│   └── investment_research_report.md
+│
+├── src/
+│   ├── __pycache__/
+│   ├── crew.py
+│   ├── tools.py
+│   └── utils.py
+│
+├── streamlit/
+│
+├── tests/
+│   ├── test_tools.py
+│   ├── test_crew.py
+│   └── test_agents.py
+│
+├── .dockerignore
+├── .env
+├── .gitignore
+├── app.py
+├── docker-compose.prod.yml
+├── Dockerfile
+├── Jenkinsfile
+├── main.py
+└── requirements.txt
+
+
+
+
+Source              Tool                              Used By
+──────────────────────────────────────────────────────────────────────────
+Angel One           authenticate_angel()              all agents (init)
+Angel One           get_angel_ltp(symbol)             technical, portfolio
+Angel One           get_angel_quote(symbol)           technical, portfolio
+Angel One           get_angel_historical_data(...)    technical, risk
+Screener.in         get_screener_fundamentals(sym)    fundamental, risk
+Screener.in         get_screener_peers(symbol)        fundamental, screener
+NSE                 get_nse_corporate_actions(sym)    sentiment, risk
+NSE                 get_nse_shareholding_pattern(sym) risk
+NSE/BSE             get_fii_dii_flows()               market_context
+RSS                 get_rss_news(sym, company)        sentiment
+BSE                 get_bse_announcements(symbol)     sentiment, risk
+utils               symbol_resolver(ticker)           all tools
+
+
+
+
+# Core Framework
+crewai>=0.100.0
+crewai-tools>=0.10.0
+
+# Anthropic
+anthropic>=0.40.0
+
+# Angel One
+SmartApi-python>=1.5.0
+pyotp>=2.9.0
+logzero>=1.7.0
+websocket-client>=1.6.0
+
+# Data & Scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+feedparser>=6.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Frontend
+streamlit>=1.40.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+nest-asyncio>=1.6.0
+scipy>=1.11.0

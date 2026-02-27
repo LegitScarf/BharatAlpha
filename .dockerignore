@@ -1,0 +1,45 @@
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual environment ───────────────────────────────────────
+venv/
+.venv/
+env/
+.env.local
+.env.*.local
+
+# ── Output files (mounted as volume in production) ────────────
+output/
+watchlist/
+
+# ── Tests ─────────────────────────────────────────────────────
+tests/
+*.test.py
+
+# ── IDE & OS ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Git ───────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── CI/CD ─────────────────────────────────────────────────────
+Jenkinsfile
+.dockerignore
+
+# ── Docs ──────────────────────────────────────────────────────
+*.md
+docs/

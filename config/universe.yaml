@@ -1,0 +1,728 @@
+# ============================================================
+# BharatAlpha — config/universe.yaml
+# ============================================================
+# Nifty 500 universe organized by sector.
+# Used by stock_screener_agent to filter candidates.
+#
+# screener_symbol: used for screener.in URLs
+# nse_symbol:      used for NSE API calls
+# angel_symbol:    used for Angel One SmartAPI
+# weight:          Nifty 500 index weight tier (1=large, 2=mid, 3=small)
+# ============================================================
+
+meta:
+  last_updated: "2026-02-26"
+  total_stocks: 120
+  index: "Nifty 500"
+  note: "Representative subset — expand as needed"
+
+# ── Screening filters (used by stock_screener_agent) ─────────
+screening_defaults:
+  min_market_cap_cr: 5000          # Minimum ₹5,000 Cr market cap
+  max_pe_ratio: 60                 # Exclude extremely overvalued stocks
+  min_roe: 10                      # Minimum 10% Return on Equity
+  min_promoter_holding: 25         # Minimum 25% promoter stake
+  max_debt_to_equity: 2.0          # Exclude highly leveraged (ex-financials)
+  max_pledge_pct: 30               # Flag if promoter pledge > 30%
+  min_revenue_growth_3yr: 5        # 3-year revenue CAGR > 5%
+  target_candidates: 25            # Number of stocks to shortlist per run
+
+# ── Sector weightings for portfolio construction ─────────────
+sector_weights:
+  Financial Services:         0.33
+  Information Technology:     0.13
+  Oil & Gas:                  0.12
+  Fast Moving Consumer Goods: 0.09
+  Automobile:                 0.08
+  Healthcare:                 0.07
+  Metals & Mining:            0.05
+  Capital Goods:              0.05
+  Telecom:                    0.03
+  Chemicals:                  0.03
+  Real Estate:                0.02
+
+# ════════════════════════════════════════════════════════════
+#  SECTORS AND STOCKS
+# ════════════════════════════════════════════════════════════
+
+sectors:
+
+  # ── FINANCIAL SERVICES ─────────────────────────────────────
+  - name: Financial Services
+    normalised: Financial Services
+    stocks:
+      - screener_symbol: HDFCBANK
+        nse_symbol: HDFCBANK
+        angel_symbol: HDFCBANK
+        company: HDFC Bank Ltd
+        weight: 1
+        sub_sector: Private Bank
+
+      - screener_symbol: ICICIBANK
+        nse_symbol: ICICIBANK
+        angel_symbol: ICICIBANK
+        company: ICICI Bank Ltd
+        weight: 1
+        sub_sector: Private Bank
+
+      - screener_symbol: KOTAKBANK
+        nse_symbol: KOTAKBANK
+        angel_symbol: KOTAKBANK
+        company: Kotak Mahindra Bank Ltd
+        weight: 1
+        sub_sector: Private Bank
+
+      - screener_symbol: AXISBANK
+        nse_symbol: AXISBANK
+        angel_symbol: AXISBANK
+        company: Axis Bank Ltd
+        weight: 1
+        sub_sector: Private Bank
+
+      - screener_symbol: SBIN
+        nse_symbol: SBIN
+        angel_symbol: SBIN
+        company: State Bank of India
+        weight: 1
+        sub_sector: PSU Bank
+
+      - screener_symbol: BAJFINANCE
+        nse_symbol: BAJFINANCE
+        angel_symbol: BAJFINANCE
+        company: Bajaj Finance Ltd
+        weight: 1
+        sub_sector: NBFC
+
+      - screener_symbol: BAJAJFINSV
+        nse_symbol: BAJAJFINSV
+        angel_symbol: BAJAJFINSV
+        company: Bajaj Finserv Ltd
+        weight: 1
+        sub_sector: Diversified Financial
+
+      - screener_symbol: SBILIFE
+        nse_symbol: SBILIFE
+        angel_symbol: SBILIFE
+        company: SBI Life Insurance Company Ltd
+        weight: 1
+        sub_sector: Insurance
+
+      - screener_symbol: HDFCLIFE
+        nse_symbol: HDFCLIFE
+        angel_symbol: HDFCLIFE
+        company: HDFC Life Insurance Company Ltd
+        weight: 1
+        sub_sector: Insurance
+
+      - screener_symbol: ICICIGI
+        nse_symbol: ICICIGI
+        angel_symbol: ICICIGI
+        company: ICICI Lombard General Insurance
+        weight: 2
+        sub_sector: Insurance
+
+      - screener_symbol: INDUSINDBK
+        nse_symbol: INDUSINDBK
+        angel_symbol: INDUSINDBK
+        company: IndusInd Bank Ltd
+        weight: 1
+        sub_sector: Private Bank
+
+      - screener_symbol: BANDHANBNK
+        nse_symbol: BANDHANBNK
+        angel_symbol: BANDHANBNK
+        company: Bandhan Bank Ltd
+        weight: 2
+        sub_sector: Private Bank
+
+      - screener_symbol: PNB
+        nse_symbol: PNB
+        angel_symbol: PNB
+        company: Punjab National Bank
+        weight: 2
+        sub_sector: PSU Bank
+
+      - screener_symbol: BANKBARODA
+        nse_symbol: BANKBARODA
+        angel_symbol: BANKBARODA
+        company: Bank of Baroda
+        weight: 2
+        sub_sector: PSU Bank
+
+      - screener_symbol: CHOLAFIN
+        nse_symbol: CHOLAFIN
+        angel_symbol: CHOLAFIN
+        company: Cholamandalam Investment and Finance
+        weight: 2
+        sub_sector: NBFC
+
+      - screener_symbol: MUTHOOTFIN
+        nse_symbol: MUTHOOTFIN
+        angel_symbol: MUTHOOTFIN
+        company: Muthoot Finance Ltd
+        weight: 2
+        sub_sector: NBFC
+
+  # ── INFORMATION TECHNOLOGY ─────────────────────────────────
+  - name: Information Technology
+    normalised: Information Technology
+    stocks:
+      - screener_symbol: TCS
+        nse_symbol: TCS
+        angel_symbol: TCS
+        company: Tata Consultancy Services Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: INFY
+        nse_symbol: INFY
+        angel_symbol: INFY
+        company: Infosys Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: HCLTECH
+        nse_symbol: HCLTECH
+        angel_symbol: HCLTECH
+        company: HCL Technologies Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: WIPRO
+        nse_symbol: WIPRO
+        angel_symbol: WIPRO
+        company: Wipro Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: TECHM
+        nse_symbol: TECHM
+        angel_symbol: TECHM
+        company: Tech Mahindra Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: LTIM
+        nse_symbol: LTIM
+        angel_symbol: LTIM
+        company: LTIMindtree Ltd
+        weight: 1
+        sub_sector: IT Services
+
+      - screener_symbol: MPHASIS
+        nse_symbol: MPHASIS
+        angel_symbol: MPHASIS
+        company: Mphasis Ltd
+        weight: 2
+        sub_sector: IT Services
+
+      - screener_symbol: PERSISTENT
+        nse_symbol: PERSISTENT
+        angel_symbol: PERSISTENT
+        company: Persistent Systems Ltd
+        weight: 2
+        sub_sector: IT Services
+
+      - screener_symbol: COFORGE
+        nse_symbol: COFORGE
+        angel_symbol: COFORGE
+        company: Coforge Ltd
+        weight: 2
+        sub_sector: IT Services
+
+      - screener_symbol: KPITTECH
+        nse_symbol: KPITTECH
+        angel_symbol: KPITTECH
+        company: KPIT Technologies Ltd
+        weight: 2
+        sub_sector: IT Services
+
+  # ── OIL & GAS ───────────────────────────────────────────────
+  - name: Oil & Gas
+    normalised: Oil & Gas
+    stocks:
+      - screener_symbol: RELIANCE
+        nse_symbol: RELIANCE
+        angel_symbol: RELIANCE
+        company: Reliance Industries Ltd
+        weight: 1
+        sub_sector: Integrated
+
+      - screener_symbol: ONGC
+        nse_symbol: ONGC
+        angel_symbol: ONGC
+        company: Oil & Natural Gas Corporation Ltd
+        weight: 1
+        sub_sector: Exploration
+
+      - screener_symbol: IOC
+        nse_symbol: IOC
+        angel_symbol: IOC
+        company: Indian Oil Corporation Ltd
+        weight: 1
+        sub_sector: Refining & Marketing
+
+      - screener_symbol: BPCL
+        nse_symbol: BPCL
+        angel_symbol: BPCL
+        company: Bharat Petroleum Corporation Ltd
+        weight: 1
+        sub_sector: Refining & Marketing
+
+      - screener_symbol: GAIL
+        nse_symbol: GAIL
+        angel_symbol: GAIL
+        company: GAIL (India) Ltd
+        weight: 1
+        sub_sector: Gas Distribution
+
+      - screener_symbol: HINDPETRO
+        nse_symbol: HINDPETRO
+        angel_symbol: HINDPETRO
+        company: Hindustan Petroleum Corporation Ltd
+        weight: 2
+        sub_sector: Refining & Marketing
+
+      - screener_symbol: PETRONET
+        nse_symbol: PETRONET
+        angel_symbol: PETRONET
+        company: Petronet LNG Ltd
+        weight: 2
+        sub_sector: Gas Distribution
+
+  # ── FAST MOVING CONSUMER GOODS ──────────────────────────────
+  - name: Fast Moving Consumer Goods
+    normalised: Fast Moving Consumer Goods
+    stocks:
+      - screener_symbol: HINDUNILVR
+        nse_symbol: HINDUNILVR
+        angel_symbol: HINDUNILVR
+        company: Hindustan Unilever Ltd
+        weight: 1
+        sub_sector: Personal Care
+
+      - screener_symbol: ITC
+        nse_symbol: ITC
+        angel_symbol: ITC
+        company: ITC Ltd
+        weight: 1
+        sub_sector: Diversified FMCG
+
+      - screener_symbol: NESTLEIND
+        nse_symbol: NESTLEIND
+        angel_symbol: NESTLEIND
+        company: Nestle India Ltd
+        weight: 1
+        sub_sector: Food & Beverages
+
+      - screener_symbol: BRITANNIA
+        nse_symbol: BRITANNIA
+        angel_symbol: BRITANNIA
+        company: Britannia Industries Ltd
+        weight: 1
+        sub_sector: Food & Beverages
+
+      - screener_symbol: DABUR
+        nse_symbol: DABUR
+        angel_symbol: DABUR
+        company: Dabur India Ltd
+        weight: 1
+        sub_sector: Personal Care
+
+      - screener_symbol: MARICO
+        nse_symbol: MARICO
+        angel_symbol: MARICO
+        company: Marico Ltd
+        weight: 1
+        sub_sector: Personal Care
+
+      - screener_symbol: GODREJCP
+        nse_symbol: GODREJCP
+        angel_symbol: GODREJCP
+        company: Godrej Consumer Products Ltd
+        weight: 1
+        sub_sector: Personal Care
+
+      - screener_symbol: COLPAL
+        nse_symbol: COLPAL
+        angel_symbol: COLPAL
+        company: Colgate-Palmolive (India) Ltd
+        weight: 1
+        sub_sector: Personal Care
+
+      - screener_symbol: TATACONSUM
+        nse_symbol: TATACONSUM
+        angel_symbol: TATACONSUM
+        company: Tata Consumer Products Ltd
+        weight: 1
+        sub_sector: Food & Beverages
+
+      - screener_symbol: EMAMILTD
+        nse_symbol: EMAMILTD
+        angel_symbol: EMAMILTD
+        company: Emami Ltd
+        weight: 2
+        sub_sector: Personal Care
+
+  # ── AUTOMOBILE ──────────────────────────────────────────────
+  - name: Automobile
+    normalised: Automobile
+    stocks:
+      - screener_symbol: MARUTI
+        nse_symbol: MARUTI
+        angel_symbol: MARUTI
+        company: Maruti Suzuki India Ltd
+        weight: 1
+        sub_sector: Passenger Vehicles
+
+      - screener_symbol: TATAMOTORS
+        nse_symbol: TATAMOTORS
+        angel_symbol: TATAMOTORS
+        company: Tata Motors Ltd
+        weight: 1
+        sub_sector: Commercial & Passenger Vehicles
+
+      - screener_symbol: M-M
+        nse_symbol: M&M
+        angel_symbol: M&M
+        company: Mahindra & Mahindra Ltd
+        weight: 1
+        sub_sector: Passenger & Commercial Vehicles
+
+      - screener_symbol: BAJAJ-AUTO
+        nse_symbol: BAJAJ-AUTO
+        angel_symbol: BAJAJ-AUTO
+        company: Bajaj Auto Ltd
+        weight: 1
+        sub_sector: Two & Three Wheelers
+
+      - screener_symbol: HEROMOTOCO
+        nse_symbol: HEROMOTOCO
+        angel_symbol: HEROMOTOCO
+        company: Hero MotoCorp Ltd
+        weight: 1
+        sub_sector: Two Wheelers
+
+      - screener_symbol: EICHERMOT
+        nse_symbol: EICHERMOT
+        angel_symbol: EICHERMOT
+        company: Eicher Motors Ltd
+        weight: 1
+        sub_sector: Two Wheelers & Commercial Vehicles
+
+      - screener_symbol: TVSMOTOR
+        nse_symbol: TVSMOTOR
+        angel_symbol: TVSMOTOR
+        company: TVS Motor Company Ltd
+        weight: 2
+        sub_sector: Two Wheelers
+
+      - screener_symbol: ASHOKLEY
+        nse_symbol: ASHOKLEY
+        angel_symbol: ASHOKLEY
+        company: Ashok Leyland Ltd
+        weight: 2
+        sub_sector: Commercial Vehicles
+
+      - screener_symbol: BOSCHLTD
+        nse_symbol: BOSCHLTD
+        angel_symbol: BOSCHLTD
+        company: Bosch Ltd
+        weight: 2
+        sub_sector: Auto Components
+
+      - screener_symbol: MOTHERSON
+        nse_symbol: MOTHERSON
+        angel_symbol: MOTHERSON
+        company: Samvardhana Motherson International
+        weight: 2
+        sub_sector: Auto Components
+
+  # ── HEALTHCARE ──────────────────────────────────────────────
+  - name: Healthcare
+    normalised: Healthcare
+    stocks:
+      - screener_symbol: SUNPHARMA
+        nse_symbol: SUNPHARMA
+        angel_symbol: SUNPHARMA
+        company: Sun Pharmaceutical Industries Ltd
+        weight: 1
+        sub_sector: Pharma
+
+      - screener_symbol: DRREDDY
+        nse_symbol: DRREDDY
+        angel_symbol: DRREDDY
+        company: Dr. Reddy's Laboratories Ltd
+        weight: 1
+        sub_sector: Pharma
+
+      - screener_symbol: CIPLA
+        nse_symbol: CIPLA
+        angel_symbol: CIPLA
+        company: Cipla Ltd
+        weight: 1
+        sub_sector: Pharma
+
+      - screener_symbol: DIVISLAB
+        nse_symbol: DIVISLAB
+        angel_symbol: DIVISLAB
+        company: Divi's Laboratories Ltd
+        weight: 1
+        sub_sector: Pharma - API
+
+      - screener_symbol: APOLLOHOSP
+        nse_symbol: APOLLOHOSP
+        angel_symbol: APOLLOHOSP
+        company: Apollo Hospitals Enterprise Ltd
+        weight: 1
+        sub_sector: Hospitals
+
+      - screener_symbol: AUROPHARMA
+        nse_symbol: AUROPHARMA
+        angel_symbol: AUROPHARMA
+        company: Aurobindo Pharma Ltd
+        weight: 2
+        sub_sector: Pharma
+
+      - screener_symbol: TORNTPHARM
+        nse_symbol: TORNTPHARM
+        angel_symbol: TORNTPHARM
+        company: Torrent Pharmaceuticals Ltd
+        weight: 2
+        sub_sector: Pharma
+
+      - screener_symbol: LUPIN
+        nse_symbol: LUPIN
+        angel_symbol: LUPIN
+        company: Lupin Ltd
+        weight: 2
+        sub_sector: Pharma
+
+      - screener_symbol: MAXHEALTH
+        nse_symbol: MAXHEALTH
+        angel_symbol: MAXHEALTH
+        company: Max Healthcare Institute Ltd
+        weight: 2
+        sub_sector: Hospitals
+
+  # ── METALS & MINING ─────────────────────────────────────────
+  - name: Metals & Mining
+    normalised: Metals & Mining
+    stocks:
+      - screener_symbol: TATASTEEL
+        nse_symbol: TATASTEEL
+        angel_symbol: TATASTEEL
+        company: Tata Steel Ltd
+        weight: 1
+        sub_sector: Steel
+
+      - screener_symbol: JSWSTEEL
+        nse_symbol: JSWSTEEL
+        angel_symbol: JSWSTEEL
+        company: JSW Steel Ltd
+        weight: 1
+        sub_sector: Steel
+
+      - screener_symbol: HINDALCO
+        nse_symbol: HINDALCO
+        angel_symbol: HINDALCO
+        company: Hindalco Industries Ltd
+        weight: 1
+        sub_sector: Aluminium
+
+      - screener_symbol: VEDL
+        nse_symbol: VEDL
+        angel_symbol: VEDL
+        company: Vedanta Ltd
+        weight: 1
+        sub_sector: Diversified Metals
+
+      - screener_symbol: COALINDIA
+        nse_symbol: COALINDIA
+        angel_symbol: COALINDIA
+        company: Coal India Ltd
+        weight: 1
+        sub_sector: Mining
+
+      - screener_symbol: SAIL
+        nse_symbol: SAIL
+        angel_symbol: SAIL
+        company: Steel Authority of India Ltd
+        weight: 2
+        sub_sector: Steel
+
+      - screener_symbol: NMDC
+        nse_symbol: NMDC
+        angel_symbol: NMDC
+        company: NMDC Ltd
+        weight: 2
+        sub_sector: Mining
+
+  # ── CAPITAL GOODS & INDUSTRIALS ─────────────────────────────
+  - name: Capital Goods
+    normalised: Capital Goods
+    stocks:
+      - screener_symbol: LT
+        nse_symbol: LT
+        angel_symbol: LT
+        company: Larsen & Toubro Ltd
+        weight: 1
+        sub_sector: Engineering & Construction
+
+      - screener_symbol: SIEMENS
+        nse_symbol: SIEMENS
+        angel_symbol: SIEMENS
+        company: Siemens Ltd
+        weight: 1
+        sub_sector: Industrial Equipment
+
+      - screener_symbol: ABB
+        nse_symbol: ABB
+        angel_symbol: ABB
+        company: ABB India Ltd
+        weight: 2
+        sub_sector: Industrial Equipment
+
+      - screener_symbol: BHEL
+        nse_symbol: BHEL
+        angel_symbol: BHEL
+        company: Bharat Heavy Electricals Ltd
+        weight: 2
+        sub_sector: Heavy Engineering
+
+      - screener_symbol: HAVELLS
+        nse_symbol: HAVELLS
+        angel_symbol: HAVELLS
+        company: Havells India Ltd
+        weight: 2
+        sub_sector: Electricals
+
+      - screener_symbol: CUMMINSIND
+        nse_symbol: CUMMINSIND
+        angel_symbol: CUMMINSIND
+        company: Cummins India Ltd
+        weight: 2
+        sub_sector: Industrial Equipment
+
+      - screener_symbol: THERMAX
+        nse_symbol: THERMAX
+        angel_symbol: THERMAX
+        company: Thermax Ltd
+        weight: 2
+        sub_sector: Energy & Environment
+
+  # ── TELECOM ─────────────────────────────────────────────────
+  - name: Telecom
+    normalised: Telecom
+    stocks:
+      - screener_symbol: BHARTIARTL
+        nse_symbol: BHARTIARTL
+        angel_symbol: BHARTIARTL
+        company: Bharti Airtel Ltd
+        weight: 1
+        sub_sector: Telecom Services
+
+      - screener_symbol: IDEA
+        nse_symbol: IDEA
+        angel_symbol: IDEA
+        company: Vodafone Idea Ltd
+        weight: 3
+        sub_sector: Telecom Services
+
+      - screener_symbol: INDUSTOWER
+        nse_symbol: INDUSTOWER
+        angel_symbol: INDUSTOWER
+        company: Indus Towers Ltd
+        weight: 2
+        sub_sector: Tower Infrastructure
+
+  # ── CHEMICALS ───────────────────────────────────────────────
+  - name: Chemicals
+    normalised: Chemicals
+    stocks:
+      - screener_symbol: ASIANPAINT
+        nse_symbol: ASIANPAINT
+        angel_symbol: ASIANPAINT
+        company: Asian Paints Ltd
+        weight: 1
+        sub_sector: Paints
+
+      - screener_symbol: PIDILITIND
+        nse_symbol: PIDILITIND
+        angel_symbol: PIDILITIND
+        company: Pidilite Industries Ltd
+        weight: 1
+        sub_sector: Adhesives
+
+      - screener_symbol: SRF
+        nse_symbol: SRF
+        angel_symbol: SRF
+        company: SRF Ltd
+        weight: 2
+        sub_sector: Specialty Chemicals
+
+      - screener_symbol: DEEPAKNITRITE
+        nse_symbol: DEEPAKNITRITE
+        angel_symbol: DEEPAKNTR
+        company: Deepak Nitrite Ltd
+        weight: 2
+        sub_sector: Specialty Chemicals
+
+      - screener_symbol: ATUL
+        nse_symbol: ATUL
+        angel_symbol: ATUL
+        company: Atul Ltd
+        weight: 2
+        sub_sector: Specialty Chemicals
+
+      - screener_symbol: GUJGASLTD
+        nse_symbol: GUJGASLTD
+        angel_symbol: GUJGASLTD
+        company: Gujarat Gas Ltd
+        weight: 2
+        sub_sector: Gas Distribution
+
+  # ── REAL ESTATE ─────────────────────────────────────────────
+  - name: Real Estate
+    normalised: Real Estate
+    stocks:
+      - screener_symbol: DLF
+        nse_symbol: DLF
+        angel_symbol: DLF
+        company: DLF Ltd
+        weight: 1
+        sub_sector: Residential & Commercial
+
+      - screener_symbol: GODREJPROP
+        nse_symbol: GODREJPROP
+        angel_symbol: GODREJPROP
+        company: Godrej Properties Ltd
+        weight: 1
+        sub_sector: Residential
+
+      - screener_symbol: OBEROIRLTY
+        nse_symbol: OBEROIRLTY
+        angel_symbol: OBEROIRLTY
+        company: Oberoi Realty Ltd
+        weight: 2
+        sub_sector: Residential & Commercial
+
+      - screener_symbol: PRESTIGE
+        nse_symbol: PRESTIGE
+        angel_symbol: PRESTIGE
+        company: Prestige Estates Projects Ltd
+        weight: 2
+        sub_sector: Residential
+
+      - screener_symbol: PHOENIXLTD
+        nse_symbol: PHOENIXLTD
+        angel_symbol: PHOENIXLTD
+        company: Phoenix Mills Ltd
+        weight: 2
+        sub_sector: Retail Malls
+
+# ── Special watchlist (user-defined stocks outside sector filters) ──
+watchlist:
+  enabled: true
+  max_stocks: 10
+  stocks: []   # Populated by user via Streamlit sidebar
