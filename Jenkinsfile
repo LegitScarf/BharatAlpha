@@ -330,23 +330,23 @@ except Exception as e:
                     """
 
                     // Verify key directories exist in the built image
+                    // --entrypoint overrides the streamlit ENTRYPOINT so bash runs cleanly
                     sh """
                         echo "Verifying image structure..."
-                        docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} \
-                            bash -c "
-                                test -d /app/src     && echo '  ✓ /app/src'     || (echo '  ✗ /app/src missing'     && exit 1)
-                                test -d /app/config  && echo '  ✓ /app/config'  || (echo '  ✗ /app/config missing'  && exit 1)
-                                test -f /app/app.py  && echo '  ✓ /app/app.py'  || (echo '  ✗ /app/app.py missing'  && exit 1)
-                                test -d /app/output  && echo '  ✓ /app/output'  || (echo '  ✗ /app/output missing'  && exit 1)
-                                echo '  ✓ Image structure verified'
-                            "
+                        docker run --rm --entrypoint bash ${IMAGE_NAME}:${IMAGE_TAG} -c "
+                            test -d /app/src     && echo '  ✓ /app/src'     || (echo '  ✗ /app/src missing'     && exit 1)
+                            test -d /app/config  && echo '  ✓ /app/config'  || (echo '  ✗ /app/config missing'  && exit 1)
+                            test -f /app/app.py  && echo '  ✓ /app/app.py'  || (echo '  ✗ /app/app.py missing'  && exit 1)
+                            test -d /app/output  && echo '  ✓ /app/output'  || (echo '  ✗ /app/output missing'  && exit 1)
+                            echo '  ✓ Image structure verified'
+                        "
                     """
 
                     // Verify Python imports work inside the image
+                    // --entrypoint overrides streamlit so python runs directly
                     sh """
                         echo "Verifying Python imports..."
-                        docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} \
-                            python -c "
+                        docker run --rm --entrypoint python ${IMAGE_NAME}:${IMAGE_TAG} -c "
 from src.utils import get_logger, DataQualityTracker, composite_score
 from src.crew  import BharatAlphaCrew
 import streamlit
