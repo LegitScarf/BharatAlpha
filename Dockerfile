@@ -51,8 +51,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for security
-RUN groupadd -r bharatalpha && useradd -r -g bharatalpha bharatalpha
+# Create non-root user WITH a home directory.
+# CrewAI LTMSQLiteStorage calls db_storage_path() at import time which
+# tries to create ~/.local/share/app/ — without a home dir this raises
+# PermissionError before the app even starts.
+RUN groupadd -r bharatalpha && \
+    useradd -r -g bharatalpha -m -d /home/bharatalpha bharatalpha && \
+    mkdir -p /home/bharatalpha/.local/share/app && \
+    chown -R bharatalpha:bharatalpha /home/bharatalpha
 
 WORKDIR /app
 
@@ -67,8 +73,8 @@ COPY config/   /app/config/
 COPY src/      /app/src/
 COPY app.py    /app/app.py
 
-# Create output directory and set ownership
-RUN mkdir -p /app/output && \
+# Create output/watchlist directories and set ownership
+RUN mkdir -p /app/output /app/watchlist && \
     chown -R bharatalpha:bharatalpha /app
 
 # Make output directory a volume mount point

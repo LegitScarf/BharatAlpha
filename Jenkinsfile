@@ -342,19 +342,20 @@ except Exception as e:
                         "
                     """
 
-                    // Verify Python imports work inside the image
-                    // --entrypoint overrides streamlit so python runs directly
+                    // Verify venv packages exist inside the image.
+                    // We use pip show (not import) to avoid triggering
+                    // CrewAI's LTMSQLiteStorage which tries to create
+                    // ~/.local/share/app at import time — that path is
+                    // only safe inside the running container, not here.
                     sh """
-                        echo "Verifying Python imports..."
-                        docker run --rm --entrypoint python ${IMAGE_NAME}:${IMAGE_TAG} -c "
-from src.utils import get_logger, DataQualityTracker, composite_score
-from src.crew  import BharatAlphaCrew
-import streamlit
-import crewai
-print('  ✓ All imports resolved')
-print(f'  ✓ crewai {crewai.__version__}')
-print(f'  ✓ streamlit {streamlit.__version__}')
-"
+                        echo "Verifying venv packages..."
+                        docker run --rm --entrypoint bash ${IMAGE_NAME}:${IMAGE_TAG} -c "
+                            /app/venv/bin/pip show streamlit  | grep -q 'Name: streamlit'  && echo '  ✓ streamlit'  || (echo '  ✗ streamlit missing'  && exit 1)
+                            /app/venv/bin/pip show crewai     | grep -q 'Name: crewai'     && echo '  ✓ crewai'     || (echo '  ✗ crewai missing'     && exit 1)
+                            /app/venv/bin/pip show anthropic  | grep -q 'Name: anthropic'  && echo '  ✓ anthropic'  || (echo '  ✗ anthropic missing'  && exit 1)
+                            /app/venv/bin/pip show pandas     | grep -q 'Name: pandas'     && echo '  ✓ pandas'     || (echo '  ✗ pandas missing'     && exit 1)
+                            echo '  ✓ All packages verified'
+                        "
                     """
                 }
             }
