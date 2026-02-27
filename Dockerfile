@@ -60,10 +60,12 @@ WORKDIR /app
 COPY --from=builder /build/venv /app/venv
 
 # Copy application code
+# NOTE: .env is intentionally NOT copied — credentials are injected
+# at runtime via docker run -e flags from Jenkins credentials store.
+# Never bake secrets into a Docker image.
 COPY config/   /app/config/
 COPY src/      /app/src/
 COPY app.py    /app/app.py
-COPY .env      /app/.env
 
 # Create output directory and set ownership
 RUN mkdir -p /app/output && \
