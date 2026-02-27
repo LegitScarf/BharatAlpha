@@ -180,6 +180,8 @@ with open('$f') as fh:
         // ── Stage 3: API Connectivity ─────────────────────────
         // Added for BharatAlpha — no point building if primary
         // data source (Angel One) is unreachable or misconfigured.
+        // FIX: Write Python script to a temp file to avoid shell
+        // quoting collapse when nesting python3 -c inside bash -c.
         stage('API Connectivity') {
             when {
                 expression { return !params.SKIP_API_CHECK }
@@ -193,55 +195,49 @@ with open('$f') as fh:
                         string(credentialsId: 'ANGEL_TOTP_SECRET',  variable: 'ANGEL_TOTP_SECRET'),
                         string(credentialsId: 'ANTHROPIC_API_KEY',  variable: 'ANTHROPIC_API_KEY'),
                     ]) {
+                        // Write the Python auth script to a temp file first.
+                        // This sidesteps the Groovy/bash/python triple-quoting
+                        // problem entirely — the file is mounted into the container
+                        // and run directly with python3 /workspace/auth_test.py.
+                        writeFile file: 'auth_test.py', text: '''
+import os, sys
+try:
+    import pyotp
+    from SmartApi import SmartConnect
+    api   = SmartConnect(api_key=os.environ["ANGEL_API_KEY"])
+    totp  = pyotp.TOTP(os.environ["ANGEL_TOTP_SECRET"]).now()
+    data  = api.generateSession(
+        os.environ["ANGEL_CLIENT_ID"],
+        os.environ["ANGEL_MPIN"],
+        totp
+    )
+    if data and data.get("status") is True:
+        print("Angel One auth: SUCCESS")
+        sys.exit(0)
+    else:
+        msg = data.get("message", "unknown error") if data else "null response"
+        print("Angel One auth FAILED:", msg)
+        sys.exit(1)
+except Exception as e:
+    print("Angel One auth EXCEPTION:", str(e))
+    sys.exit(1)
+'''
                         sh '''
                             echo "Testing Angel One SmartAPI authentication..."
 
-                            # Run auth test inside a temporary container using the
-                            # same Python environment as the final image, so we catch
-                            # auth failures BEFORE committing to a full build.
                             docker run --rm \
                                 -e ANGEL_API_KEY="$ANGEL_API_KEY" \
                                 -e ANGEL_CLIENT_ID="$ANGEL_CLIENT_ID" \
                                 -e ANGEL_MPIN="$ANGEL_MPIN" \
                                 -e ANGEL_TOTP_SECRET="$ANGEL_TOTP_SECRET" \
-                                -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
                                 -v "$(pwd)":/workspace \
                                 -w /workspace \
                                 python:3.11-slim \
-                                bash -c "
-                                    pip install SmartApi-python pyotp requests python-dotenv --quiet 2>/dev/null
-                                    python3 -c \"
-import os, sys
-os.environ.setdefault('ANGEL_API_KEY',     '$ANGEL_API_KEY')
-os.environ.setdefault('ANGEL_CLIENT_ID',   '$ANGEL_CLIENT_ID')
-os.environ.setdefault('ANGEL_MPIN',        '$ANGEL_MPIN')
-os.environ.setdefault('ANGEL_TOTP_SECRET', '$ANGEL_TOTP_SECRET')
+                                bash -c "pip install SmartApi-python pyotp --quiet 2>/dev/null && python3 /workspace/auth_test.py"
 
-try:
-    import pyotp
-    from SmartApi import SmartConnect
-    api = SmartConnect(api_key=os.environ['ANGEL_API_KEY'])
-    totp_secret = os.environ['ANGEL_TOTP_SECRET']
-    totp = pyotp.TOTP(totp_secret).now()
-    data = api.generateSession(
-        os.environ['ANGEL_CLIENT_ID'],
-        os.environ['ANGEL_MPIN'],
-        totp
-    )
-    if data and data.get('status') is True:
-        print('✓ Angel One auth: SUCCESS')
-        sys.exit(0)
-    else:
-        print('✗ Angel One auth FAILED:', data.get('message', 'unknown error'))
-        sys.exit(1)
-except Exception as e:
-    print('✗ Angel One auth EXCEPTION:', str(e))
-    sys.exit(1)
-\"
-                                " 2>&1
-
+                            rm -f auth_test.py
                             echo ""
-                            echo "✓ API connectivity verified"
+                            echo "✓ Angel One auth verified"
                         '''
 
                         // Anthropic API reachability check (lightweight)
@@ -253,8 +249,6 @@ except Exception as e:
                                 https://api.anthropic.com/v1/models 2>/dev/null || echo "000")
 
                             if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "401" ]; then
-                                # 200 = valid key, 401 = reachable but key format issue
-                                # Both mean the endpoint is reachable
                                 echo "✓ Anthropic API endpoint reachable (HTTP $HTTP_CODE)"
                             else
                                 echo "⚠ Anthropic API returned HTTP $HTTP_CODE — network issue possible"
