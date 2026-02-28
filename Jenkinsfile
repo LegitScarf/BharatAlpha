@@ -342,18 +342,16 @@ except Exception as e:
                         "
                     """
 
-                    // Verify venv packages exist inside the image.
-                    // We use pip show (not import) to avoid triggering
-                    // CrewAI's LTMSQLiteStorage which tries to create
-                    // ~/.local/share/app at import time — that path is
-                    // only safe inside the running container, not here.
+                    // Verify packages installed correctly in system Python.
+                    // Single-stage build: no venv, packages at /usr/local/lib/python3.11
+                    // Use pip show — avoids triggering CrewAI home-dir side effects.
                     sh """
-                        echo "Verifying venv packages..."
+                        echo "Verifying installed packages..."
                         docker run --rm --entrypoint bash ${IMAGE_NAME}:${IMAGE_TAG} -c "
-                            /app/venv/bin/pip show streamlit  | grep -q 'Name: streamlit'  && echo '  ✓ streamlit'  || (echo '  ✗ streamlit missing'  && exit 1)
-                            /app/venv/bin/pip show crewai     | grep -q 'Name: crewai'     && echo '  ✓ crewai'     || (echo '  ✗ crewai missing'     && exit 1)
-                            /app/venv/bin/pip show anthropic  | grep -q 'Name: anthropic'  && echo '  ✓ anthropic'  || (echo '  ✗ anthropic missing'  && exit 1)
-                            /app/venv/bin/pip show pandas     | grep -q 'Name: pandas'     && echo '  ✓ pandas'     || (echo '  ✗ pandas missing'     && exit 1)
+                            pip show streamlit | grep -q 'Name: streamlit' && echo '  ✓ streamlit'  || (echo '  ✗ streamlit missing'  && exit 1)
+                            pip show crewai    | grep -q 'Name: crewai'    && echo '  ✓ crewai'     || (echo '  ✗ crewai missing'     && exit 1)
+                            pip show anthropic | grep -q 'Name: anthropic' && echo '  ✓ anthropic'  || (echo '  ✗ anthropic missing'  && exit 1)
+                            pip show pandas    | grep -q 'Name: pandas'    && echo '  ✓ pandas'     || (echo '  ✗ pandas missing'     && exit 1)
                             echo '  ✓ All packages verified'
                         "
                     """
