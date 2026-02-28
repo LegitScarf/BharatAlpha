@@ -1,4 +1,6 @@
 import os
+import time
+import random
 import logging
 from typing import Optional, Callable
 from pathlib import Path
@@ -68,7 +70,7 @@ class BharatAlphaCrew():
             model="anthropic/claude-haiku-4-5-20251001",
             api_key=os.getenv("ANTHROPIC_API_KEY"),
             temperature=0.1,
-            max_tokens=4096
+            max_tokens=2048        # reduced to stay under rate limit
         )
 
     def _sonnet(self) -> LLM:
@@ -76,7 +78,7 @@ class BharatAlphaCrew():
             model="anthropic/claude-sonnet-4-5",
             api_key=os.getenv("ANTHROPIC_API_KEY"),
             temperature=0.2,
-            max_tokens=8192
+            max_tokens=4096        # reduced to stay under 30k TPM rate limit
         )
 
     # ─────────────────────────────────────────────
@@ -116,7 +118,7 @@ class BharatAlphaCrew():
                 get_screener_fundamentals,
                 get_screener_peers,
             ],
-            llm=self._sonnet(),
+            llm=self._haiku(),     # downgraded from sonnet — saves ~15k TPM
             verbose=True,
             allow_delegation=False
         )
@@ -168,7 +170,7 @@ class BharatAlphaCrew():
             tools=[
                 get_angel_ltp,
             ],
-            llm=self._sonnet(),
+            llm=self._haiku(),     # downgraded from sonnet — saves ~10k TPM
             verbose=True,
             allow_delegation=False
         )
@@ -267,53 +269,90 @@ def run_pipeline(
     Authenticates Angel One, kicks off the BharatAlpha pipeline,
     and returns the full crew result dict.
 
-    Args:
-        step_callback: Optional callable for Streamlit live step updates.
-        task_callback: Optional callable for Streamlit live task updates.
-
-    Returns:
-        dict with keys: result, data_quality, status, error (if any)
+    Rate limit strategy:
+    - Only report_generator uses Sonnet; all others use Haiku
+    - max_tokens capped at 2048 (haiku) / 4096 (sonnet)
+    - Exponential backoff retry on 429 errors (30s, 60s, 120s, 240s)
     """
     logger.info("═" * 60)
     logger.info("  BHARATALPHA PIPELINE — STARTING")
     logger.info("═" * 60)
 
-    # Step 1: Authenticate Angel One before pipeline starts
+    # Step 1: Authenticate Angel One
     logger.info("Authenticating Angel One SmartAPI...")
     auth = authenticate_angel.func()
     if auth.get("status") != "success":
         logger.error(f"Angel One auth failed: {auth.get('message')}")
         logger.warning("Continuing pipeline — price data tools will be unavailable.")
 
-    # Step 2: Run the crew
-    try:
-        crew_instance = BharatAlphaCrew(
-            step_callback=step_callback,
-            task_callback=task_callback
-        )
+    # Step 2: Run crew with exponential backoff on rate limit errors.
+    # Anthropic free tier = 30k input tokens/min. 8 agents × ~3k tokens = risk of 429.
+    # Backoff: 30s → 60s → 120s → 240s (+jitter).
+    MAX_RETRIES = 4
+    last_error = None
 
-        logger.info("Starting CrewAI pipeline...")
-        result = crew_instance.crew().kickoff()
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            crew_instance = BharatAlphaCrew(
+                step_callback=step_callback,
+                task_callback=task_callback
+            )
+            logger.info(f"Starting CrewAI pipeline (attempt {attempt}/{MAX_RETRIES})...")
+            result = crew_instance.crew().kickoff()
 
-        dq = get_data_quality()
-        logger.info("═" * 60)
-        logger.info("  BHARATALPHA PIPELINE — COMPLETE")
-        logger.info(f"  Data Quality: {dq.summary()}")
-        logger.info("═" * 60)
+            # Success
+            dq = get_data_quality()
+            logger.info("═" * 60)
+            logger.info("  BHARATALPHA PIPELINE — COMPLETE")
+            logger.info(f"  Data Quality: {dq.summary()}")
+            logger.info("═" * 60)
+            return {
+                "status":       "success",
+                "result":       result,
+                "data_quality": dq.to_dict(),
+                "error":        None
+            }
 
-        return {
-            "status":       "success",
-            "result":       result,
-            "data_quality": dq.to_dict(),
-            "error":        None
-        }
+        except Exception as e:
+            last_error = e
+            err_str = str(e)
+            is_rate_limit = (
+                "rate_limit" in err_str
+                or "429" in err_str
+                or "RateLimitError" in err_str
+            )
+            if is_rate_limit and attempt < MAX_RETRIES:
+                wait = (2 ** attempt) * 30 + random.uniform(0, 10)
+                logger.warning(
+                    f"Rate limit hit (attempt {attempt}/{MAX_RETRIES}). "
+                    f"Waiting {wait:.0f}s before retry..."
+                )
+                if step_callback:
+                    try:
+                        step_callback(
+                            f"⏳ Rate limit — waiting {wait:.0f}s "
+                            f"(retry {attempt}/{MAX_RETRIES})"
+                        )
+                    except Exception:
+                        pass
+                time.sleep(wait)
+            else:
+                # Non-rate-limit error OR max retries exhausted
+                logger.exception(f"Pipeline failed: {e}")
+                dq = get_data_quality()
+                return {
+                    "status":       "failed",
+                    "result":       None,
+                    "data_quality": dq.to_dict(),
+                    "error":        str(e)
+                }
 
-    except Exception as e:
-        logger.exception(f"Pipeline failed: {e}")
-        dq = get_data_quality()
-        return {
-            "status":       "failed",
-            "result":       None,
-            "data_quality": dq.to_dict(),
-            "error":        str(e)
-        }
+    # Should not reach here, but safety net
+    logger.error("Pipeline exhausted all retries")
+    dq = get_data_quality()
+    return {
+        "status":       "failed",
+        "result":       None,
+        "data_quality": dq.to_dict(),
+        "error":        str(last_error)
+    }
