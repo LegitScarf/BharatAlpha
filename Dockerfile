@@ -56,11 +56,15 @@ COPY requirements.txt .
 # --no-cache-dir keeps image lean.
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt && \
-    # Purge build tools now that compilation is done
+    # Purge ONLY C build tools — setuptools and pkg_resources MUST
+    # remain: CrewAI telemetry.py does "import pkg_resources" at
+    # runtime (crewai/telemetry/telemetry.py line 20). Removing
+    # setuptools removes pkg_resources and crashes the pipeline.
     apt-get purge -y --auto-remove \
     build-essential gcc g++ \
     libffi-dev libssl-dev libxml2-dev libxslt1-dev && \
-    rm -rf /var/lib/apt/lists/* /root/.cache/pip
+    rm -rf /var/lib/apt/lists/* /root/.cache/pip && \
+    python -c "import pkg_resources; print('pkg_resources OK')"
 
 # ── Application code ──────────────────────────────────────────
 # NOTE: .env is intentionally NOT copied — credentials are injected
