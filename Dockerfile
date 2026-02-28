@@ -54,16 +54,16 @@ COPY requirements.txt .
 
 # Install into the system Python (no venv needed in single-stage).
 # --no-cache-dir keeps image lean.
-RUN pip install --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt && \
-    # Purge ONLY C build tools — setuptools and pkg_resources MUST
-    # remain: CrewAI telemetry.py does "import pkg_resources" at
-    # runtime (crewai/telemetry/telemetry.py line 20). Removing
-    # setuptools removes pkg_resources and crashes the pipeline.
+# IMPORTANT: apt-get purge --auto-remove removes setuptools because
+# apt does not know pip installed it. We must reinstall setuptools
+# AFTER the purge so pkg_resources is available at runtime.
+# CrewAI telemetry.py imports pkg_resources at module load time.
+RUN pip install --no-cache-dir -r requirements.txt && \
     apt-get purge -y --auto-remove \
     build-essential gcc g++ \
     libffi-dev libssl-dev libxml2-dev libxslt1-dev && \
     rm -rf /var/lib/apt/lists/* /root/.cache/pip && \
+    pip install --no-cache-dir setuptools && \
     python -c "import pkg_resources; print('pkg_resources OK')"
 
 # ── Application code ──────────────────────────────────────────
