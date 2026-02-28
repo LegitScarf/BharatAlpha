@@ -379,37 +379,47 @@ OUTPUT_DIR = Path(__file__).parent / "output"
 #  PIPELINE CALLBACKS & RUNNER
 # ─────────────────────────────────────────────
 
-def _step_callback(step_output):
-    """Called by CrewAI after each agent thought/action step."""
-    try:
-        msg = str(step_output)[:300]
-        ts  = datetime.now().strftime("%H:%M:%S")
-        agent = st.session_state.get("current_agent", "agent")
-        st.session_state["log_queue"].put(("step", ts, agent, msg))
-    except Exception:
-        pass
+def _make_callbacks(q):
+    """
+    Returns step/task callbacks that write into a plain Python queue.
+    These closures capture `q` directly — they never touch st.session_state,
+    which is inaccessible from background threads (no ScriptRunContext).
+    """
+    def step_callback(step_output):
+        try:
+            msg = str(step_output)[:300]
+            ts  = datetime.now().strftime("%H:%M:%S")
+            q.put(("step", ts, "agent", msg))
+        except Exception:
+            pass
+
+    def task_callback(task_output):
+        try:
+            ts = datetime.now().strftime("%H:%M:%S")
+            q.put(("task_done", ts, "", ""))
+        except Exception:
+            pass
+
+    return step_callback, task_callback
 
 
-def _task_callback(task_output):
-    """Called by CrewAI after each task completes."""
-    try:
-        ts = datetime.now().strftime("%H:%M:%S")
-        st.session_state["log_queue"].put(("task_done", ts, "", ""))
-    except Exception:
-        pass
-
-
-def _run_pipeline_thread():
-    """Runs in a background thread — never touches Streamlit state directly."""
+def _run_pipeline_thread(q):
+    """
+    Runs in a background thread.
+    Receives the queue as a direct argument — NEVER accesses st.session_state.
+    st.session_state is bound to a Streamlit ScriptRunContext which does not
+    exist in background threads, causing KeyError on every access.
+    """
     try:
         from src.crew import run_pipeline
+        step_cb, task_cb = _make_callbacks(q)
         result = run_pipeline(
-            step_callback=_step_callback,
-            task_callback=_task_callback
+            step_callback=step_cb,
+            task_callback=task_cb
         )
-        st.session_state["log_queue"].put(("done", "", "", json.dumps(result, default=str)))
+        q.put(("done", "", "", json.dumps(result, default=str)))
     except Exception as e:
-        st.session_state["log_queue"].put(("error", "", "", str(e)))
+        q.put(("error", "", "", str(e)))
 
 
 def _drain_log_queue():
@@ -490,7 +500,9 @@ def _start_pipeline():
     st.session_state["task_status"][first] = "running"
     st.session_state["current_agent"] = TASK_AGENTS[first]
 
-    thread = threading.Thread(target=_run_pipeline_thread, daemon=True)
+    # Pass the queue directly — thread must not access st.session_state
+    q = st.session_state["log_queue"]
+    thread = threading.Thread(target=_run_pipeline_thread, args=(q,), daemon=True)
     thread.start()
 
 

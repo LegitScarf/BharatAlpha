@@ -73,7 +73,7 @@ class BharatAlphaCrew():
 
     def _sonnet(self) -> LLM:
         return LLM(
-            model="anthropic/claude-sonnet-4-5-20251014",
+            model="anthropic/claude-sonnet-4-5",
             api_key=os.getenv("ANTHROPIC_API_KEY"),
             temperature=0.2,
             max_tokens=8192
