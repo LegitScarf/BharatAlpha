@@ -1,0 +1,79 @@
+```json
+{
+  "task": "fundamental_analysis",
+  "results": [
+    {
+      "symbol": "RELIANCE",
+      "company": "Reliance Industries",
+      "sector": "Energy",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
+      "data_quality": "limited"
+    },
+    {
+      "symbol": "TCS",
+      "company": "Tata Consultancy Services",
+      "sector": "IT",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
+      "data_quality": "limited"
+    },
+    {
+      "symbol": "INFY",
+      "company": "Infosys",
+      "sector": "IT",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
+      "data_quality": "limited"
+    },
+    {
+      "symbol": "HDFCBANK",
+      "company": "HDFC Bank",
+      "sector": "Banking",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
+      "data_quality": "limited"
+    },
+    {
+      "symbol": "ICICIBANK",
+      "company": "ICICI Bank",
+      "sector": "Banking",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
+      "data_quality": "limited"
+    }
+  ],
+  "top_picks_fundamental": [],
+  "confidence": 0.0
+}
+```

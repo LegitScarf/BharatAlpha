@@ -1,0 +1,68 @@
+```json
+{
+  "task": "technical_analysis",
+  "results": [
+    {
+      "symbol": "RELIANCE",
+      "current_price": null,
+      "above_50dma": null,
+      "above_200dma": null,
+      "rsi_14": null,
+      "trend_direction": "sideways",
+      "support": null,
+      "resistance": null,
+      "technical_score": 0.0,
+      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+    },
+    {
+      "symbol": "TCS",
+      "current_price": null,
+      "above_50dma": null,
+      "above_200dma": null,
+      "rsi_14": null,
+      "trend_direction": "sideways",
+      "support": null,
+      "resistance": null,
+      "technical_score": 0.0,
+      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+    },
+    {
+      "symbol": "INFY",
+      "current_price": null,
+      "above_50dma": null,
+      "above_200dma": null,
+      "rsi_14": null,
+      "trend_direction": "sideways",
+      "support": null,
+      "resistance": null,
+      "technical_score": 0.0,
+      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+    },
+    {
+      "symbol": "HDFCBANK",
+      "current_price": null,
+      "above_50dma": null,
+      "above_200dma": null,
+      "rsi_14": null,
+      "trend_direction": "sideways",
+      "support": null,
+      "resistance": null,
+      "technical_score": 0.0,
+      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+    },
+    {
+      "symbol": "ICICIBANK",
+      "current_price": null,
+      "above_50dma": null,
+      "above_200dma": null,
+      "rsi_14": null,
+      "trend_direction": "sideways",
+      "support": null,
+      "resistance": null,
+      "technical_score": 0.0,
+      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+    }
+  ],
+  "confidence": 0.0
+}
+```

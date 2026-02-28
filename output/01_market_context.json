@@ -1,0 +1,39 @@
+```json
+{
+  "task": "market_context",
+  "timestamp": "2026-02-28T12:29:46.002154+05:30",
+  "market_bias": "neutral",
+  "volatility_regime": "medium",
+  "india_vix": null,
+  "nifty50": {
+    "level": null,
+    "change_pct": null
+  },
+  "institutional_flows": {
+    "fii_net_10d_cr": null,
+    "dii_net_10d_cr": null,
+    "institutional_bias": "neutral"
+  },
+  "sector_rotation": {
+    "strong_sectors": [],
+    "weak_sectors": []
+  },
+  "key_risks": [
+    "Data availability constraints from NSE source",
+    "FII/DII flow data retrieval failure",
+    "Incomplete market breadth and sector performance data"
+  ],
+  "macro_commentary": "Market context tool returned success status but with empty indices data, preventing full macro assessment. FII/DII flows API encountered parsing error, limiting institutional flow analysis. Current data gaps prevent definitive bullish/bearish bias determination.",
+  "data_gaps": [
+    "Nifty 50 level and daily change percentage",
+    "Nifty 500 performance metrics",
+    "India VIX volatility index",
+    "Sector-wise index performance",
+    "Market breadth (advances vs declines)",
+    "FII net flows (10-day aggregate)",
+    "DII net flows (10-day aggregate)",
+    "Daily FII/DII flow breakdown"
+  ],
+  "confidence": 0.15
+}
+```
