@@ -1,4 +1,3 @@
-```json
 {
   "task": "fundamental_analysis",
   "results": [
@@ -76,4 +75,3 @@
   "top_picks_fundamental": [],
   "confidence": 0.0
 }
-```
