@@ -116,9 +116,12 @@ class BharatAlphaCrew():
             config=self.agents_config["fundamental_analyst_agent"],
             tools=[
                 get_screener_fundamentals,
-                get_screener_peers,
+                # get_screener_peers removed — returns large HTML tables that
+                # spike intra-task conversation to 50k+ tokens, causing 429s.
+                # Peer benchmarking is nice-to-have; core valuation metrics
+                # from get_screener_fundamentals are sufficient for scoring.
             ],
-            llm=self._haiku(),     # downgraded from sonnet — saves ~15k TPM
+            llm=self._haiku(),
             verbose=True,
             allow_delegation=False
         )
@@ -249,7 +252,7 @@ class BharatAlphaCrew():
             process=Process.sequential,
             verbose=True,
             memory=False,
-            max_rpm=30,
+            max_rpm=8,             # throttle to ~8 LLM calls/min — prevents 429s
             full_output=True,
             step_callback=self._step_callback,
             task_callback=self._task_callback

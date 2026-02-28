@@ -1,57 +1,40 @@
 # ============================================================
 # BharatAlpha — config/tasks.yaml
 # ============================================================
+# CONTEXT CHAIN STRATEGY:
+#   Each task receives only the minimum context it needs.
+#   Full JSON outputs are trimmed to avoid bloating prompts
+#   and hitting Anthropic's 50k TPM rate limit on Haiku.
+# ============================================================
 
 analyze_market_context:
   description: >
     Fetch and analyse the current Indian equity market environment.
 
     TOOL USAGE (IN ORDER):
-    1. Call get_market_context()
-       - Fetches Nifty indices, India VIX, advance/decline, and sector data
-       - Validate: must contain status='success'
-       - If failure: log in data_gaps and proceed with available data
+    1. Call get_market_context() — fetches Nifty indices, India VIX,
+       advance/decline, sector data. Validate status='success'.
+    2. Call get_fii_dii_flows(days=10) — fetches 10-day FII/DII flows.
 
-    2. Call get_fii_dii_flows(days=10)
-       - Fetches 10-day institutional buy/sell activity
-       - Validate: check institutional_sentiment field
-       - If failure: note in data_gaps
-
-    3. Analyse the combined data to determine:
-       - Overall market bias (bullish/neutral/bearish)
-       - Volatility regime based on India VIX level
-       - Which sectors are showing strength vs weakness
-       - Whether FII flows support or contradict price action
-       - Key macro risks
-
+    Determine: market_bias (bullish/neutral/bearish), volatility_regime,
+    strong/weak sectors, institutional flow alignment, key macro risks.
     NEVER fabricate index levels or flow numbers.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON with this structure (be concise — keep under 800 tokens):
     {
       "task": "market_context",
-      "timestamp": "<ISO timestamp IST>",
+      "timestamp": "<ISO IST>",
       "market_bias": "<bullish|neutral|bearish>",
       "volatility_regime": "<low|medium|high>",
       "india_vix": <float or null>,
-      "nifty50": {
-        "level": <float or null>,
-        "change_pct": <float or null>,
-        "52w_position": "<near_high|mid_range|near_low|unknown>"
-      },
-      "institutional_flows": {
-        "fii_net_10d_cr": <float or null>,
-        "dii_net_10d_cr": <float or null>,
-        "institutional_bias": "<bullish|neutral|bearish>"
-      },
-      "sector_rotation": {
-        "strong_sectors": ["<sector1>", "<sector2>"],
-        "weak_sectors": ["<sector1>", "<sector2>"]
-      },
-      "key_risks": ["<risk1>", "<risk2>", "<risk3>"],
-      "macro_commentary": "<2-3 sentence summary>",
-      "data_gaps": ["<any missing data>"],
-      "confidence": <float 0-1>
+      "nifty50": {"level": <float>, "change_pct": <float>},
+      "institutional_flows": {"fii_net_10d_cr": <float>, "dii_net_10d_cr": <float>, "institutional_bias": "<bullish|neutral|bearish>"},
+      "sector_rotation": {"strong_sectors": ["<s1>","<s2>"], "weak_sectors": ["<s1>","<s2>"]},
+      "key_risks": ["<r1>","<r2>","<r3>"],
+      "macro_commentary": "<2 sentence summary>",
+      "data_gaps": [],
+      "confidence": <float>
     }
 
   agent: market_context_agent
@@ -61,50 +44,26 @@ analyze_market_context:
 
 screen_universe:
   description: >
-    Screen the Nifty 500 universe from universe.yaml to identify
-    20-25 high-quality candidates for deep analysis.
+    Screen the Nifty 500 universe to identify 20-25 candidates.
 
-    STEPS:
-    1. Load the sector and stock data from config/universe.yaml
-    2. Apply screening_defaults filters from universe.yaml:
-       - Market cap > ₹5,000 Cr
-       - P/E ratio < 60 (or sector-appropriate)
-       - ROE > 10%
-       - Promoter holding > 25%
-    3. Factor in market_bias from analyze_market_context:
-       - bullish: include cyclicals (Metals, Auto, Real Estate)
-       - bearish: prefer defensives (FMCG, Pharma, IT)
-       - neutral: balanced across sectors
-    4. Target 20-25 candidates across at least 5 sectors
-    5. Note WHY each stock passed the screen
+    CONTEXT: Use market_bias from prior task to tilt sector selection.
+    - bullish: include cyclicals (Metals, Auto, Real Estate)
+    - bearish: prefer defensives (FMCG, Pharma, IT)
+    - neutral: balanced
 
-    Use your knowledge of Indian markets for the pre-filter.
-    Deep fundamental analysis happens in analyze_fundamentals.
+    Apply filters: Market cap >5000Cr, P/E <60, ROE >10%, Promoter >25%.
+    Target 20-25 stocks across 5+ sectors. Use your market knowledge.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 1000 tokens):
     {
       "task": "screen_universe",
-      "timestamp": "<ISO timestamp IST>",
       "market_bias_applied": "<bullish|neutral|bearish>",
-      "total_screened": <integer>,
       "candidates": [
-        {
-          "symbol": "<NSE symbol>",
-          "company": "<full company name>",
-          "sector": "<sector name>",
-          "sub_sector": "<sub-sector>",
-          "screen_reason": "<why this stock passed>",
-          "priority": "<high|medium>",
-          "weight_tier": <1, 2, or 3>
-        }
+        {"symbol": "<NSE>", "company": "<name>", "sector": "<sector>", "priority": "<high|medium>", "weight_tier": <1|2|3>}
       ],
-      "sector_distribution": {
-        "<sector_name>": <count>
-      },
-      "excluded_sectors": ["<sector>"],
-      "screen_commentary": "<2-3 sentence rationale>",
-      "confidence": <float 0-1>
+      "sector_distribution": {"<sector>": <count>},
+      "confidence": <float>
     }
 
   agent: stock_screener_agent
@@ -116,69 +75,42 @@ screen_universe:
 
 analyze_fundamentals:
   description: >
-    Conduct deep fundamental analysis on the top 10 candidates
-    from screen_universe (prioritise high-priority stocks).
+    Fundamental analysis on the top 5 HIGH-PRIORITY candidates only
+    (weight_tier=1 or priority=high from screen_universe).
+    Analyse exactly 5 stocks — no more.
 
-    TOOL USAGE:
-    For each of the top 10 stocks:
-    1. Call get_screener_fundamentals(symbol)
-       - Fetches P/E, P/B, ROE, ROCE, debt/equity, EPS, revenue growth
-       - If status='failed': assign score 0.3 and note data_quality as 'limited'
+    TOOL USAGE for each stock (one call per stock only):
+    1. get_screener_fundamentals(symbol) — fetches P/E, P/B, ROE, ROCE,
+       D/E, EPS growth. Do NOT call any other tools.
 
-    2. Call get_screener_peers(symbol)
-       - Fetches peer comparison table for sector benchmarking
-       - If status='failed': skip peer comparison, note in score_rationale
-
-    3. Assign fundamental_score (0.0 to 1.0):
-       - 0.8-1.0: Attractive valuation + strong profitability
-       - 0.6-0.8: Fair value with good quality metrics
-       - 0.4-0.6: Fairly valued, average quality
-       - 0.2-0.4: Expensive or weak fundamentals
-       - 0.0-0.2: Avoid — overvalued or fundamentally weak
-
-    NEVER invent ratios. Use only numbers returned by tools.
+    Assign fundamental_score 0.0-1.0:
+    0.8+: attractive valuation + strong profitability
+    0.6-0.8: fair value, good quality
+    0.4-0.6: average
+    <0.4: expensive or weak
+    NEVER invent ratios. Use ONLY numbers returned by the tool.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 1500 tokens):
     {
       "task": "fundamental_analysis",
-      "timestamp": "<ISO timestamp IST>",
-      "stocks_analysed": <integer>,
       "results": [
         {
-          "symbol": "<NSE symbol>",
-          "company": "<company name>",
-          "sector": "<sector>",
-          "valuation": {
-            "pe_ratio": <float or null>,
-            "pb_ratio": <float or null>,
-            "ev_ebitda": <float or null>,
-            "dividend_yield": <float or null>,
-            "vs_sector_pe": "<cheap|fair|expensive|unknown>"
-          },
-          "profitability": {
-            "roe": <float or null>,
-            "roce": <float or null>,
-            "revenue_growth_3yr": <float or null>,
-            "profit_growth_3yr": <float or null>
-          },
-          "financial_health": {
-            "debt_to_equity": <float or null>,
-            "interest_coverage": <float or null>,
-            "assessment": "<strong|moderate|stretched|unknown>"
-          },
-          "fundamental_score": <float 0.0-1.0>,
-          "score_rationale": "<2-3 sentence justification>",
+          "symbol": "<NSE>", "company": "<name>", "sector": "<sector>",
+          "pe_ratio": <float|null>, "pb_ratio": <float|null>,
+          "roe": <float|null>, "roce": <float|null>,
+          "debt_to_equity": <float|null>, "revenue_growth_3yr": <float|null>,
+          "fundamental_score": <float>,
+          "score_rationale": "<1 sentence>",
           "data_quality": "<complete|partial|limited>"
         }
       ],
-      "top_picks_fundamental": ["<symbol1>", "<symbol2>", "<symbol3>"],
-      "confidence": <float 0-1>
+      "top_picks_fundamental": ["<s1>","<s2>","<s3>"],
+      "confidence": <float>
     }
 
   agent: fundamental_analyst_agent
   context:
-    - analyze_market_context
     - screen_universe
   output_file: output/03_fundamental_analysis.json
   config: {}
@@ -186,80 +118,39 @@ analyze_fundamentals:
 
 analyze_technicals:
   description: >
-    Analyse price action and technical indicators for all stocks
-    with fundamental_score >= 0.5 from analyze_fundamentals.
+    Technical analysis for the top 5 stocks from analyze_fundamentals
+    (those with highest fundamental_score).
 
-    TOOL USAGE:
-    For each qualifying stock:
-    1. Call get_angel_historical_data(symbol, days=180)
-       - Fetches 6-month daily OHLCV data
-       - Validate: must have at least 30 candles to proceed
-       - If status='failed': assign technical_score=0.4, data_source='unavailable'
+    TOOL USAGE for each stock:
+    1. get_angel_historical_data(symbol, days=60) — 60 days OHLCV only
+    2. get_angel_quote(symbol) — current price
 
-    2. Call get_angel_quote(symbol)
-       - Fetches current price, 52-week high/low, and volume
-       - If status='failed': use last close from historical data
-
-    3. Compute from the OHLCV arrays:
-       - 50-day and 200-day simple moving averages
-       - RSI(14) using standard Wilder smoothing
-       - Volume vs 20-day average
-       - Key support (recent swing low) and resistance (recent swing high)
-
-    4. Assign technical_score (0.0 to 1.0):
-       - 0.8-1.0: Strong uptrend, above all MAs, healthy volume
-       - 0.6-0.8: Mild uptrend or consolidation near support
-       - 0.4-0.6: Sideways, mixed signals
-       - 0.2-0.4: Downtrend or below key moving averages
-       - 0.0-0.2: Strong downtrend, avoid
-
-    COMPUTE actual values from OHLCV arrays. Never invent prices.
+    Compute: 20-day SMA, RSI(14), support/resistance.
+    Assign technical_score 0.0-1.0. NEVER invent prices.
+    Analyse exactly 5 stocks — no more.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 1200 tokens):
     {
       "task": "technical_analysis",
-      "timestamp": "<ISO timestamp IST>",
-      "stocks_analysed": <integer>,
       "results": [
         {
-          "symbol": "<NSE symbol>",
-          "current_price": <float or null>,
-          "price_vs_52w": {
-            "high_52w": <float or null>,
-            "low_52w": <float or null>,
-            "pct_from_high": <float or null>,
-            "pct_from_low": <float or null>
-          },
-          "trend": {
-            "above_50dma": <true|false|null>,
-            "above_200dma": <true|false|null>,
-            "direction": "<uptrend|downtrend|sideways|unknown>"
-          },
-          "momentum": {
-            "rsi_14": <float or null>,
-            "condition": "<overbought|neutral|oversold|unknown>"
-          },
-          "volume": {
-            "vs_20d_avg": "<above|below|inline|unknown>"
-          },
-          "levels": {
-            "support": <float or null>,
-            "resistance": <float or null>,
-            "entry_zone": "<price range string or null>"
-          },
-          "technical_score": <float 0.0-1.0>,
-          "score_rationale": "<2 sentence justification>",
-          "data_source": "<angel_one|unavailable>"
+          "symbol": "<NSE>",
+          "current_price": <float|null>,
+          "above_50dma": <true|false|null>,
+          "above_200dma": <true|false|null>,
+          "rsi_14": <float|null>,
+          "trend_direction": "<uptrend|downtrend|sideways>",
+          "support": <float|null>, "resistance": <float|null>,
+          "technical_score": <float>,
+          "score_rationale": "<1 sentence>"
         }
       ],
-      "confidence": <float 0-1>
+      "confidence": <float>
     }
 
   agent: technical_analyst_agent
   context:
-    - analyze_market_context
-    - screen_universe
     - analyze_fundamentals
   output_file: output/04_technical_analysis.json
   config: {}
@@ -267,64 +158,35 @@ analyze_technicals:
 
 assess_sentiment:
   description: >
-    Assess news flow and corporate announcement sentiment for all
-    stocks with fundamental_score >= 0.5 from analyze_fundamentals.
+    Sentiment analysis for the same 5 stocks from analyze_fundamentals.
 
-    TOOL USAGE:
-    For each qualifying stock:
-    1. Call get_rss_news(symbol, company_name)
-       - Aggregates headlines from ET, Moneycontrol, BS, NDTV Profit, Google News
-       - If total_articles=0: assign sentiment_score=0.5, note 'no_news_found'
+    TOOL USAGE for each stock (2 calls max per stock):
+    1. get_rss_news(symbol, company_name) — recent headlines only
+    2. get_bse_announcements(symbol, days_back=3) — last 3 days only
+    Skip get_nse_corporate_actions to reduce token usage.
 
-    2. Call get_bse_announcements(symbol, days_back=14)
-       - Fetches recent corporate disclosures and filings
-       - If status='failed': skip, note in score_rationale
-
-    3. Call get_nse_corporate_actions(symbol)
-       - Fetches upcoming dividends, splits, bonuses, AGMs
-       - If status='failed': skip
-
-    4. Analyse headlines and announcements for:
-       - Positive: earnings beat, contract wins, buyback, promoter buying
-       - Negative: earnings miss, SEBI action, management exits, debt concerns
-       - Catalysts: upcoming results date, dividend record date, product launch
-
-    5. Assign sentiment_score (0.0 to 1.0):
-       - 0.8-1.0: Strong positive news flow, clear catalysts ahead
-       - 0.6-0.8: Mild positive or neutral news
-       - 0.4-0.6: Mixed signals
-       - 0.2-0.4: Some negative news, caution warranted
-       - 0.0-0.2: Significant negative news, avoid
-
-    NEVER fabricate news events. Only analyse text returned by tools.
+    Assign sentiment_score 0.0-1.0. NEVER fabricate news events.
+    Analyse exactly 5 stocks — no more.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 1000 tokens):
     {
       "task": "sentiment_analysis",
-      "timestamp": "<ISO timestamp IST>",
-      "stocks_analysed": <integer>,
       "results": [
         {
-          "symbol": "<NSE symbol>",
-          "news_count": <integer>,
-          "announcement_count": <integer>,
-          "positive_signals": ["<signal1>", "<signal2>"],
-          "negative_signals": ["<signal1>", "<signal2>"],
-          "upcoming_catalysts": ["<catalyst1>", "<catalyst2>"],
-          "key_headlines": ["<headline1>", "<headline2>", "<headline3>"],
-          "sentiment_score": <float 0.0-1.0>,
-          "score_rationale": "<2 sentence justification>"
+          "symbol": "<NSE>",
+          "sentiment_score": <float>,
+          "key_signals": ["<signal1>","<signal2>"],
+          "upcoming_catalysts": ["<c1>"],
+          "score_rationale": "<1 sentence>"
         }
       ],
       "overall_market_sentiment": "<positive|neutral|negative>",
-      "confidence": <float 0-1>
+      "confidence": <float>
     }
 
   agent: sentiment_analyst_agent
   context:
-    - analyze_market_context
-    - screen_universe
     - analyze_fundamentals
   output_file: output/05_sentiment_analysis.json
   config: {}
@@ -332,63 +194,38 @@ assess_sentiment:
 
 evaluate_risk:
   description: >
-    Evaluate downside risks for all stocks analysed in
-    analyze_fundamentals, analyze_technicals, and assess_sentiment.
+    Risk assessment for all analysed stocks.
 
     TOOL USAGE:
-    For each stock:
-    1. Call get_nse_shareholding_pattern(symbol)
-       - Check promoter pledge percentage
-       - If pledge > 20%: set pledge_flag=true, add HIGH_PLEDGE to risk_flags
-       - If status='failed': set pledge data to null
+    1. get_nse_shareholding_pattern(symbol) — promoter pledge check
 
-    2. Use fundamental data from analyze_fundamentals:
-       - debt_to_equity > 2.0 (ex-financials): HIGH RISK flag
-       - Revenue declining 2+ quarters: MEDIUM RISK flag
-       - interest_coverage < 2.0: HIGH RISK flag
+    Also use fundamental data (D/E, interest coverage) and sentiment
+    (regulatory/management risk signals) from prior tasks.
 
-    3. Use sentiment data from assess_sentiment:
-       - SEBI/regulatory action in news: HIGH RISK flag
-       - Management exits (CEO/CFO): MEDIUM RISK flag
-
-    4. Assign risk_score (0.0 to 1.0, where 1.0 = HIGHEST RISK):
-       - 0.0-0.2: Low risk, clean governance, strong balance sheet
-       - 0.2-0.4: Moderate risk, some concerns but manageable
-       - 0.4-0.6: Elevated risk, requires monitoring
-       - 0.6-0.8: High risk, position carefully if at all
-       - 0.8-1.0: Very high risk, recommend exclude
-
-    NOTE: risk_score is INVERTED in composite — high risk = lower composite score.
+    Assign risk_score 0.0-1.0 (1.0 = HIGHEST RISK).
+    risk_score is INVERTED in composite — high risk lowers final score.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 800 tokens):
     {
       "task": "risk_assessment",
-      "timestamp": "<ISO timestamp IST>",
-      "stocks_assessed": <integer>,
       "results": [
         {
-          "symbol": "<NSE symbol>",
-          "promoter_holding_pct": <float or null>,
-          "promoter_pledge_pct": <float or null>,
+          "symbol": "<NSE>",
+          "promoter_pledge_pct": <float|null>,
           "pledge_flag": <true|false>,
-          "balance_sheet_risk": "<low|moderate|high|unknown>",
-          "governance_risk": "<low|moderate|high|unknown>",
-          "regulatory_risk": "<low|moderate|high|unknown>",
-          "risk_flags": ["<flag1>", "<flag2>"],
-          "risk_score": <float 0.0-1.0>,
-          "score_rationale": "<2 sentence justification>",
+          "risk_flags": ["<flag1>"],
+          "risk_score": <float>,
           "recommendation": "<include|caution|exclude>"
         }
       ],
       "excluded_stocks": ["<symbol>"],
-      "confidence": <float 0-1>
+      "confidence": <float>
     }
 
   agent: risk_analyst_agent
   context:
     - analyze_fundamentals
-    - analyze_technicals
     - assess_sentiment
   output_file: output/06_risk_assessment.json
   config: {}
@@ -396,83 +233,55 @@ evaluate_risk:
 
 construct_portfolio:
   description: >
-    Build the final investment portfolio by synthesising all prior analysis.
+    Build the final portfolio by synthesising all prior scores.
 
-    COMPOSITE SCORE FORMULA:
+    COMPOSITE FORMULA:
       composite = (fundamental_score * 0.40)
                 + (technical_score   * 0.30)
                 + (sentiment_score   * 0.20)
                 + ((1 - risk_score)  * 0.10)
 
-    STEPS:
-    1. For each stock NOT excluded by evaluate_risk:
-       - Retrieve scores from tasks 3, 4, 5, 6
-       - Compute composite_score using formula above
-       - Map to recommendation:
-           composite >= 0.65 → BUY
-           0.45-0.65         → HOLD
-           < 0.45            → AVOID
-
-    2. From BUY-rated stocks, select top 3-5 for the portfolio
-
-    3. For each portfolio stock determine:
-       - Position size: top conviction 25-30%, second 20-25%, third+ 15-20%
-       - Entry zone: from technical support levels in analyze_technicals
-       - Target price: 15-25% upside from current price (12-month horizon)
-       - Stop loss: 8-12% below entry based on technical support
-
-    4. Ensure max 40% allocation to any single sector
-    5. If macro_bias is bearish: reduce all position sizes by 20%
-    6. If composite conflicts exist (3+ signals disagree): default to HOLD
+    BUY: composite >= 0.65 | HOLD: 0.45-0.65 | AVOID: < 0.45
+    Select top 3-5 BUY stocks. Max 40% per sector.
+    Set entry zone from technical support, target +15-25%, stop -8-12%.
 
   expected_output: >
-    JSON object with exactly this structure:
+    JSON (keep under 1500 tokens):
     {
       "task": "portfolio_construction",
-      "timestamp": "<ISO timestamp IST>",
       "macro_bias": "<bullish|neutral|bearish>",
-      "total_stocks_evaluated": <integer>,
       "composite_scores": [
         {
-          "symbol": "<NSE symbol>",
-          "company": "<company name>",
-          "sector": "<sector>",
-          "fundamental_score": <float>,
-          "technical_score": <float>,
-          "sentiment_score": <float>,
-          "risk_score": <float>,
-          "composite_score": <float>,
-          "recommendation": "<BUY|HOLD|AVOID>"
+          "symbol": "<NSE>", "company": "<name>", "sector": "<sector>",
+          "fundamental_score": <float>, "technical_score": <float>,
+          "sentiment_score": <float>, "risk_score": <float>,
+          "composite_score": <float>, "recommendation": "<BUY|HOLD|AVOID>"
         }
       ],
       "portfolio": [
         {
-          "symbol": "<NSE symbol>",
-          "company": "<company name>",
-          "sector": "<sector>",
-          "composite_score": <float>,
-          "recommendation": "BUY",
+          "symbol": "<NSE>", "company": "<name>", "sector": "<sector>",
+          "composite_score": <float>, "recommendation": "BUY",
           "position_size_pct": <float>,
-          "current_price": <float or null>,
+          "current_price": <float|null>,
           "entry_zone": "<e.g. 1450-1500>",
-          "target_price_12m": <float or null>,
-          "stop_loss": <float or null>,
-          "upside_pct": <float or null>,
-          "investment_thesis": "<2-3 sentence thesis>"
+          "target_price_12m": <float|null>,
+          "stop_loss": <float|null>,
+          "upside_pct": <float|null>,
+          "investment_thesis": "<2 sentence thesis>"
         }
       ],
       "portfolio_metrics": {
-        "total_stocks": <integer>,
+        "total_stocks": <int>,
         "sector_allocation": {"<sector>": <pct>},
         "avg_composite_score": <float>,
         "portfolio_beta_estimate": "<low|moderate|high>"
       },
-      "confidence": <float 0-1>
+      "confidence": <float>
     }
 
   agent: portfolio_manager_agent
   context:
-    - analyze_market_context
     - analyze_fundamentals
     - analyze_technicals
     - assess_sentiment
@@ -483,57 +292,40 @@ construct_portfolio:
 
 generate_report:
   description: >
-    Generate a comprehensive professional equity research report
-    synthesising all results from tasks 1-7.
+    Generate a professional equity research report from the portfolio
+    and analysis results.
 
-    FORMAT RULES:
-    - MUST start with "# BharatAlpha Equity Research Report"
-    - NO code fences, NO backticks anywhere in the output
-    - Clear sections with markdown headings
-    - All numbers must be consistent with prior task outputs
-    - No fabricated statistics or hallucinated prices
+    FORMAT:
+    - Start with "# BharatAlpha Equity Research Report"
+    - No code fences or backticks anywhere
+    - Markdown headings throughout
+    - Keep report between 800-1500 words (concise, no padding)
+    - All numbers must match prior task outputs exactly
 
-    REPORT STRUCTURE (use these exact headings):
-    # BharatAlpha Equity Research Report
+    REQUIRED SECTIONS:
     ## Executive Summary
-    ## Market Backdrop
-    ## Screening Methodology
+    ## Market Backdrop (2-3 sentences from market_context)
     ## Portfolio Recommendations
-    ### [Company Name] (SYMBOL) — BUY | Target: ₹XXX
-    #### Investment Thesis
-    #### Fundamental Analysis
-    #### Technical Setup
-    #### Risks
-    ## Portfolio Overview
+    ### [Company] (SYMBOL) — BUY | Target: ₹XXX | Composite: X.XX
+    #### Thesis (2-3 sentences)
+    #### Key Metrics (fundamentals + technicals inline)
+    #### Risks (1-2 bullets)
+    ## Portfolio Overview (sector allocation table)
     ## Risk Disclosures
-    ## Data Quality & Methodology Notes
 
-    REQUIREMENTS:
-    - Executive summary readable in under 2 minutes
-    - Each stock section must show composite score prominently
-    - Portfolio Overview must include sector allocation table
-    - Data Quality section must mention any tool failures or data gaps
-    - Include timestamp and market status at time of analysis
-
-    End the report with this disclaimer verbatim:
-    "This report is generated by an AI system for informational and educational
-    purposes only. It does not constitute investment advice. Past performance is
-    not indicative of future results. Please consult a SEBI-registered investment
-    advisor before making any investment decisions. BharatAlpha is not SEBI registered."
+    End with this disclaimer verbatim:
+    "This report is generated by an AI system for informational and
+    educational purposes only. It does not constitute investment advice.
+    Please consult a SEBI-registered investment advisor before making
+    any investment decisions. BharatAlpha is not SEBI registered."
 
   expected_output: >
-    Pure markdown content only. No code fences. No backticks.
-    Report must be between 1500 and 4000 words.
-    All numbers consistent with data from prior tasks.
+    Pure markdown. No code fences. 800-1500 words.
+    All numbers consistent with portfolio_construction output.
 
   agent: report_generator_agent
   context:
     - analyze_market_context
-    - screen_universe
-    - analyze_fundamentals
-    - analyze_technicals
-    - assess_sentiment
-    - evaluate_risk
     - construct_portfolio
   output_file: output/08_research_report.md
   config: {}
