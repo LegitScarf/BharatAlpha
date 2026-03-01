@@ -94,7 +94,7 @@ pipeline {
                     sh '''
                         test -d src     || (echo "ERROR: src/ not found in workspace"    && exit 1)
                         test -d config  || (echo "ERROR: config/ not found in workspace" && exit 1)
-                        test -f app.py  || (echo "ERROR: app.py not found in workspace"  && exit 1)
+                        test -f app2.py  || (echo "ERROR: app.py not found in workspace"  && exit 1)
                         test -f Dockerfile || (echo "ERROR: Dockerfile not found"         && exit 1)
                         test -f requirements.txt || (echo "ERROR: requirements.txt missing" && exit 1)
                         echo "✓ Workspace structure validated"
@@ -103,7 +103,7 @@ pipeline {
                     // Quick Python syntax check on core modules
                     sh '''
                         python3 -c "import ast" 2>/dev/null || python -c "import ast"
-                        for f in src/utils.py src/tools.py src/crew.py app.py; do
+                        for f in src/utils.py src/tools.py src/crew.py app2.py; do
                             python3 -c "
 import ast, sys
 with open('$f') as fh:
@@ -336,7 +336,7 @@ except Exception as e:
                         docker run --rm --entrypoint bash ${IMAGE_NAME}:${IMAGE_TAG} -c "
                             test -d /app/src     && echo '  ✓ /app/src'     || (echo '  ✗ /app/src missing'     && exit 1)
                             test -d /app/config  && echo '  ✓ /app/config'  || (echo '  ✗ /app/config missing'  && exit 1)
-                            test -f /app/app.py  && echo '  ✓ /app/app.py'  || (echo '  ✗ /app/app.py missing'  && exit 1)
+                            test -f /app/app2.py  && echo '  ✓ /app/app2.py'  || (echo '  ✗ /app/app2.py missing'  && exit 1)
                             test -d /app/output  && echo '  ✓ /app/output'  || (echo '  ✗ /app/output missing'  && exit 1)
                             echo '  ✓ Image structure verified'
                         "

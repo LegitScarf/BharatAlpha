@@ -59,7 +59,7 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # at runtime via docker run -e flags from Jenkins credentials store.
 COPY config/   /app/config/
 COPY src/      /app/src/
-COPY app.py    /app/app.py
+COPY app2.py    /app/app2.py
 
 # ── Directory ownership ───────────────────────────────────────
 RUN mkdir -p /app/output /app/watchlist && \
@@ -88,7 +88,7 @@ EXPOSE 8501
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
     CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
-ENTRYPOINT ["python", "-m", "streamlit", "run", "app.py", \
+ENTRYPOINT ["python", "-m", "streamlit", "run", "app2.py", \
     "--server.port=8501", \
     "--server.address=0.0.0.0", \
     "--server.headless=true", \
