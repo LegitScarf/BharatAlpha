@@ -183,7 +183,7 @@ class BharatAlphaCrew():
         return Agent(
             config=self.agents_config["report_generator_agent"],
             tools=[],
-            llm=self._sonnet(),
+            llm=self._haiku(),
             verbose=True,
             allow_delegation=False
         )

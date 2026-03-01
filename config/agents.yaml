@@ -58,7 +58,7 @@ fundamental_analyst_agent:
     Indian accounting nuances — consolidated vs standalone financials, cash
     conversion cycles, and how to spot companies that are genuinely compounding
     versus those that merely look good on surface metrics.
-  llm: anthropic/claude-sonnet-4-5-20251014
+  llm: anthropic/claude-haiku-4-5-20251001
 
 
 technical_analyst_agent:
@@ -128,7 +128,7 @@ portfolio_manager_agent:
     crises. Conviction comes from the convergence of multiple signals — strong
     fundamentals, positive technicals, clean governance, and supportive macro.
     You are decisive: clear BUY, HOLD, or AVOID calls with specific price targets.
-  llm: anthropic/claude-sonnet-4-5-20251014
+  llm: anthropic/claude-haiku-4-5-20251001
 
 
 report_generator_agent:
@@ -146,4 +146,4 @@ report_generator_agent:
     summary first, evidence second, nuance third. Your reports are readable
     by a busy portfolio manager in 10 minutes yet deep enough to withstand
     scrutiny from a research analyst.
-  llm: anthropic/claude-sonnet-4-5-20251014
+  llm: anthropic/claude-haiku-4-5-20251001
