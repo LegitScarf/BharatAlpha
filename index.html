@@ -1,1308 +1,1521 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexAlpha — Intelligent Market Systems</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #030608;
-    --surface: #080f14;
-    --surface2: #0d1a22;
-    --green: #00ff88;
-    --green-dim: #00cc6a;
-    --amber: #ffb800;
-    --red: #ff3b5c;
-    --cyan: #00d4ff;
-    --text: #c8dde8;
-    --text-dim: #5a7a8a;
-    --border: rgba(0,255,136,0.15);
-    --glow: 0 0 20px rgba(0,255,136,0.3);
-    --glow-amber: 0 0 20px rgba(255,184,0,0.3);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* Grid background */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ─── TICKER ─── */
-  .ticker-wrap {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 1000;
-    background: rgba(3,6,8,0.95);
-    border-bottom: 1px solid var(--border);
-    height: 32px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
-
-  .ticker-label {
-    background: var(--green);
-    color: #000;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 0 12px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    letter-spacing: 2px;
-    flex-shrink: 0;
-  }
-
-  .ticker-track {
-    display: flex;
-    animation: ticker 30s linear infinite;
-    white-space: nowrap;
-  }
-
-  .ticker-item {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    padding: 0 28px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
-
-  .ticker-item .sym { color: var(--text); font-weight: 700; }
-  .ticker-item .up { color: var(--green); }
-  .ticker-item .down { color: var(--red); }
-
-  @keyframes ticker {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  /* ─── NAV ─── */
-  nav {
-    position: fixed;
-    top: 32px; left: 0; right: 0;
-    z-index: 900;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 60px;
-    height: 64px;
-    background: rgba(3,6,8,0.9);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .nav-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 4px;
-    color: var(--green);
-    text-shadow: var(--glow);
-    text-decoration: none;
-  }
-
-  .nav-logo span { color: var(--amber); }
-
-  .nav-links {
-    display: flex;
-    gap: 40px;
-    list-style: none;
-  }
-
-  .nav-links a {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover { color: var(--green); }
-
-  .nav-cta {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    border: 1px solid var(--green);
-    color: var(--green);
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-  }
-
-  .nav-cta:hover {
-    background: var(--green);
-    color: #000;
-    box-shadow: var(--glow);
-  }
-
-  /* ─── HERO ─── */
-  #hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 160px 60px 80px;
-    z-index: 1;
-    overflow: hidden;
-  }
-
-  .hero-bg-chart {
-    position: absolute;
-    right: 0; bottom: 0;
-    width: 55%;
-    height: 70%;
-    opacity: 0.08;
-    pointer-events: none;
-  }
-
-  .hero-content {
-    max-width: 700px;
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: var(--green);
-    text-transform: uppercase;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .hero-tag::before {
-    content: '';
-    width: 40px; height: 1px;
-    background: var(--green);
-    box-shadow: var(--glow);
-  }
-
-  .hero-tag .blink {
-    width: 6px; height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: blink 1s step-end infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(38px, 5vw, 72px);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -1px;
-    margin-bottom: 12px;
-  }
-
-  h1 .line1 { color: var(--text); }
-  h1 .line2 { color: var(--green); text-shadow: var(--glow); }
-  h1 .line3 { color: var(--amber); text-shadow: var(--glow-amber); }
-
-  .hero-sub {
-    font-size: 17px;
-    line-height: 1.7;
-    color: var(--text-dim);
-    margin: 28px 0 48px;
-    max-width: 540px;
-    font-weight: 400;
-  }
-
-  .hero-sub strong { color: var(--text); font-weight: 600; }
-
-  .hero-btns {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .btn-primary {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 14px 32px;
-    background: var(--green);
-    color: #000;
-    border: none;
-    cursor: pointer;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-block;
-  }
-
-  .btn-primary:hover {
-    box-shadow: var(--glow);
-    transform: translateY(-2px);
-  }
-
-  .btn-secondary {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 14px 32px;
-    background: transparent;
-    color: var(--text);
-    border: 1px solid rgba(200,221,232,0.2);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-block;
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--cyan);
-    color: var(--cyan);
-  }
-
-  /* Stats row */
-  .hero-stats {
-    display: flex;
-    gap: 48px;
-    margin-top: 64px;
-    padding-top: 40px;
-    border-top: 1px solid var(--border);
-  }
-
-  .stat-item .val {
-    font-family: 'Orbitron', monospace;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--green);
-    display: block;
-  }
-
-  .stat-item .lbl {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-top: 4px;
-    display: block;
-  }
-
-  /* ─── SECTION COMMONS ─── */
-  section {
-    position: relative;
-    z-index: 1;
-    padding: 100px 60px;
-  }
-
-  .section-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--green);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(28px, 3.5vw, 48px);
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 20px;
-    line-height: 1.1;
-  }
-
-  .section-title em {
-    font-style: normal;
-    color: var(--green);
-  }
-
-  .section-desc {
-    font-size: 16px;
-    color: var(--text-dim);
-    line-height: 1.7;
-    max-width: 560px;
-  }
-
-  /* ─── VISION ─── */
-  #vision {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .vision-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    margin-top: 60px;
-  }
-
-  .vision-text .big {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(18px, 2.5vw, 30px);
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.4;
-    margin-bottom: 24px;
-  }
-
-  .vision-text .big span { color: var(--amber); text-shadow: var(--glow-amber); }
-
-  .vision-text p {
-    font-size: 15px;
-    color: var(--text-dim);
-    line-height: 1.8;
-    margin-bottom: 16px;
-  }
-
-  .terminal-box {
-    background: #020a0d;
-    border: 1px solid var(--border);
-    padding: 32px;
-    font-family: 'Share Tech Mono', monospace;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .terminal-box::before {
-    content: '● ● ●';
-    position: absolute;
-    top: 12px; left: 16px;
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 4px;
-  }
-
-  .terminal-box .tb-title {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-align: center;
-    margin-bottom: 28px;
-    margin-top: 8px;
-    text-transform: uppercase;
-  }
-
-  .t-line {
-    font-size: 12px;
-    margin-bottom: 12px;
-    line-height: 1.6;
-  }
-
-  .t-line .prompt { color: var(--green); }
-  .t-line .cmd { color: var(--cyan); }
-  .t-line .out { color: var(--text-dim); padding-left: 16px; display: block; }
-  .t-line .val-up { color: var(--green); }
-  .t-line .val-down { color: var(--red); }
-
-  .t-cursor {
-    display: inline-block;
-    width: 8px; height: 14px;
-    background: var(--green);
-    vertical-align: middle;
-    animation: blink 0.8s step-end infinite;
-  }
-
-  /* ─── PRODUCTS ─── */
-  #products {
-    padding: 100px 60px;
-  }
-
-  .products-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 64px;
-  }
-
-  .beta-notice {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--amber);
-    background: rgba(255,184,0,0.08);
-    border: 1px solid rgba(255,184,0,0.25);
-    padding: 8px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-  }
-
-  .beta-notice .dot { 
-    width: 6px; height: 6px;
-    background: var(--amber);
-    border-radius: 50%;
-    animation: blink 1s step-end infinite;
-  }
-
-  .products-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-  }
-
-  /* Product Card */
-  .product-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 0;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s;
-    group: true;
-  }
-
-  .product-card:hover {
-    border-color: rgba(0,255,136,0.4);
-    transform: translateY(-4px);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.5), var(--glow);
-    z-index: 2;
-  }
-
-  .product-card.amber:hover {
-    border-color: rgba(255,184,0,0.4);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.5), var(--glow-amber);
-  }
-
-  /* Card visual header */
-  .card-visual {
-    height: 260px;
-    position: relative;
-    overflow: hidden;
-    background: #020a0d;
-  }
-
-  /* Animated chart for OptiTrade */
-  .chart-anim {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    padding: 20px;
-  }
-
-  .chart-anim svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .card-visual-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 50%, var(--surface) 100%);
-    z-index: 2;
-  }
-
-  .card-badge {
-    position: absolute;
-    top: 20px; right: 20px;
-    z-index: 5;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    padding: 5px 10px;
-    background: rgba(0,255,136,0.1);
-    border: 1px solid rgba(0,255,136,0.3);
-    color: var(--green);
-  }
-
-  .card-badge.amber-badge {
-    background: rgba(255,184,0,0.1);
-    border-color: rgba(255,184,0,0.3);
-    color: var(--amber);
-  }
-
-  .beta-tag {
-    position: absolute;
-    top: 20px; left: 20px;
-    z-index: 5;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    background: rgba(255,59,92,0.15);
-    border: 1px solid rgba(255,59,92,0.4);
-    color: var(--red);
-  }
-
-  .card-body {
-    padding: 32px 36px 40px;
-  }
-
-  .card-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 26px;
-    font-weight: 900;
-    margin-bottom: 6px;
-    color: var(--text);
-    letter-spacing: 1px;
-  }
-
-  .card-name .accent { color: var(--green); }
-  .card-name .accent-amber { color: var(--amber); }
-
-  .card-tagline {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .card-desc {
-    font-size: 14px;
-    color: var(--text-dim);
-    line-height: 1.7;
-    margin-bottom: 28px;
-  }
-
-  .card-features {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 32px;
-  }
-
-  .feat {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .feat::before {
-    content: '▸';
-    color: var(--green);
-    font-size: 10px;
-  }
-
-  .feat.amber::before { color: var(--amber); }
-
-  .card-cta {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--green);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: gap 0.2s;
-  }
-
-  .product-card:hover .card-cta { gap: 20px; }
-
-  .card-cta.amber-cta { color: var(--amber); }
-
-  .card-cta::after {
-    content: '→';
-    font-size: 16px;
-  }
-
-  /* SVG chart paths */
-  .chart-path-green {
-    fill: none;
-    stroke: var(--green);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 6px rgba(0,255,136,0.6));
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: drawLine 3s ease forwards 0.5s;
-  }
-
-  .chart-path-amber {
-    fill: none;
-    stroke: var(--amber);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 6px rgba(255,184,0,0.6));
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: drawLine 3s ease forwards 0.5s;
-  }
-
-  .chart-area-green {
-    fill: url(#greenGrad);
-    opacity: 0.3;
-    stroke: none;
-    animation: fadeIn 3.5s ease forwards;
-  }
-
-  .chart-area-amber {
-    fill: url(#amberGrad);
-    opacity: 0.25;
-    stroke: none;
-    animation: fadeIn 3.5s ease forwards;
-  }
-
-  @keyframes drawLine {
-    to { stroke-dashoffset: 0; }
-  }
-
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 0.25; }
-  }
-
-  /* Candlestick visual */
-  .candle {
-    display: inline-block;
-    width: 14px;
-    border-radius: 1px;
-    position: relative;
-    transition: height 1s ease;
-  }
-
-  /* ─── HOW IT WORKS ─── */
-  #how {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .how-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin-top: 64px;
-    border: 1px solid var(--border);
-  }
-
-  .how-step {
-    padding: 40px 32px;
-    border-right: 1px solid var(--border);
-    position: relative;
-    transition: background 0.3s;
-  }
-
-  .how-step:last-child { border-right: none; }
-  .how-step:hover { background: rgba(0,255,136,0.03); }
-
-  .step-num {
-    font-family: 'Orbitron', monospace;
-    font-size: 48px;
-    font-weight: 900;
-    color: rgba(0,255,136,0.08);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-
-  .step-icon {
-    font-size: 24px;
-    margin-bottom: 16px;
-    display: block;
-  }
-
-  .step-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 12px;
-    letter-spacing: 1px;
-  }
-
-  .step-desc {
-    font-size: 13px;
-    color: var(--text-dim);
-    line-height: 1.7;
-  }
-
-  /* ─── TECH ─── */
-  #tech {
-    padding: 100px 60px;
-  }
-
-  .tech-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-top: 60px;
-  }
-
-  .tech-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 32px;
-    transition: border-color 0.3s;
-  }
-
-  .tech-card:hover { border-color: rgba(0,212,255,0.3); }
-
-  .tech-card .tc-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--cyan);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  .tech-card .tc-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-
-  .tech-card .tc-desc {
-    font-size: 13px;
-    color: var(--text-dim);
-    line-height: 1.7;
-  }
-
-  /* ─── FOOTER ─── */
-  footer {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .footer-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 20px;
-    font-weight: 900;
-    letter-spacing: 4px;
-    color: var(--green);
-    text-shadow: var(--glow);
-  }
-
-  .footer-logo span { color: var(--amber); }
-
-  .footer-tagline {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    margin-top: 6px;
-    text-transform: uppercase;
-  }
-
-  .footer-right {
-    text-align: right;
-  }
-
-  .footer-right p {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    line-height: 2;
-  }
-
-  .footer-right a { color: var(--green); text-decoration: none; }
-
-  /* ─── DIVIDER ─── */
-  .h-divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--green), transparent);
-    opacity: 0.2;
-    margin: 0 60px;
-    width: calc(100% - 120px);
-  }
-
-  /* Animations on scroll */
-  .reveal {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* Responsive */
-  @media (max-width: 900px) {
-    nav { padding: 0 24px; }
-    section { padding: 80px 24px; }
-    #hero { padding: 140px 24px 60px; }
-    .vision-grid, .products-grid { grid-template-columns: 1fr; }
-    .how-grid { grid-template-columns: 1fr 1fr; }
-    .tech-grid { grid-template-columns: 1fr; }
-    footer { flex-direction: column; gap: 32px; text-align: center; }
-    .footer-right { text-align: center; }
-    .products-header { flex-direction: column; align-items: flex-start; gap: 20px; }
-    .hero-stats { gap: 24px; flex-wrap: wrap; }
-    nav .nav-links { display: none; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexAlpha — Intelligent Market Systems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030608;
+            --surface: #080f14;
+            --surface2: #0d1a22;
+            --green: #00ff88;
+            --green-dim: #00cc6a;
+            --amber: #ffb800;
+            --red: #ff3b5c;
+            --cyan: #00d4ff;
+            --text: #c8dde8;
+            --text-dim: #5a7a8a;
+            --border: rgba(0, 255, 136, 0.15);
+            --glow: 0 0 20px rgba(0, 255, 136, 0.3);
+            --glow-amber: 0 0 20px rgba(255, 184, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    rgba(0, 0, 0, 0.03) 4px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Grid background */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── TICKER ─── */
+        .ticker-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(3, 6, 8, 0.95);
+            border-bottom: 1px solid var(--border);
+            height: 32px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-label {
+            background: var(--green);
+            color: #000;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 0 12px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            letter-spacing: 2px;
+            flex-shrink: 0;
+        }
+
+        .ticker-track {
+            display: flex;
+            animation: ticker 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .ticker-item {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            padding: 0 28px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .ticker-item .sym {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .ticker-item .up {
+            color: var(--green);
+        }
+
+        .ticker-item .down {
+            color: var(--red);
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 32px;
+            left: 0;
+            right: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            height: 64px;
+            background: rgba(3, 6, 8, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--green);
+            text-shadow: var(--glow);
+            text-decoration: none;
+        }
+
+        .nav-logo span {
+            color: var(--amber);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--green);
+        }
+
+        .nav-cta {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 8px 20px;
+            border: 1px solid var(--green);
+            color: var(--green);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-cta:hover {
+            background: var(--green);
+            color: #000;
+            box-shadow: var(--glow);
+        }
+
+        /* ─── HERO ─── */
+        #hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 160px 60px 80px;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .hero-bg-chart {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 55%;
+            height: 70%;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-tag {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-tag::before {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--green);
+            box-shadow: var(--glow);
+        }
+
+        .hero-tag .blink {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(38px, 5vw, 72px);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        h1 .line1 {
+            color: var(--text);
+        }
+
+        h1 .line2 {
+            color: var(--green);
+            text-shadow: var(--glow);
+        }
+
+        h1 .line3 {
+            color: var(--amber);
+            text-shadow: var(--glow-amber);
+        }
+
+        .hero-sub {
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--text-dim);
+            margin: 28px 0 48px;
+            max-width: 540px;
+            font-weight: 400;
+        }
+
+        .hero-sub strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px 32px;
+            background: var(--green);
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px 32px;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid rgba(200, 221, 232, 0.2);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* Stats row */
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            margin-top: 64px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item .val {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            display: block;
+        }
+
+        .stat-item .lbl {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ─── SECTION COMMONS ─── */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 100px 60px;
+        }
+
+        .section-tag {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(28px, 3.5vw, 48px);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .section-title em {
+            font-style: normal;
+            color: var(--green);
+        }
+
+        .section-desc {
+            font-size: 16px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            max-width: 560px;
+        }
+
+        /* ─── VISION ─── */
+        #vision {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vision-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-top: 60px;
+        }
+
+        .vision-text .big {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(18px, 2.5vw, 30px);
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+
+        .vision-text .big span {
+            color: var(--amber);
+            text-shadow: var(--glow-amber);
+        }
+
+        .vision-text p {
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .terminal-box {
+            background: #020a0d;
+            border: 1px solid var(--border);
+            padding: 32px;
+            font-family: 'Share Tech Mono', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-box::before {
+            content: '● ● ●';
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 4px;
+        }
+
+        .terminal-box .tb-title {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 28px;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .t-line {
+            font-size: 12px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .t-line .prompt {
+            color: var(--green);
+        }
+
+        .t-line .cmd {
+            color: var(--cyan);
+        }
+
+        .t-line .out {
+            color: var(--text-dim);
+            padding-left: 16px;
+            display: block;
+        }
+
+        .t-line .val-up {
+            color: var(--green);
+        }
+
+        .t-line .val-down {
+            color: var(--red);
+        }
+
+        .t-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--green);
+            vertical-align: middle;
+            animation: blink 0.8s step-end infinite;
+        }
+
+        /* ─── PRODUCTS ─── */
+        #products {
+            padding: 100px 60px;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 64px;
+        }
+
+        .beta-notice {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--amber);
+            background: rgba(255, 184, 0, 0.08);
+            border: 1px solid rgba(255, 184, 0, 0.25);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .beta-notice .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--amber);
+            border-radius: 50%;
+            animation: blink 1s step-end infinite;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            group: true;
+        }
+
+        .product-card:hover {
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), var(--glow);
+            z-index: 2;
+        }
+
+        .product-card.amber:hover {
+            border-color: rgba(255, 184, 0, 0.4);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), var(--glow-amber);
+        }
+
+        /* Card visual header */
+        .card-visual {
+            height: 260px;
+            position: relative;
+            overflow: hidden;
+            background: #020a0d;
+        }
+
+        /* Animated chart for OptiTrade */
+        .chart-anim {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            padding: 20px;
+        }
+
+        .chart-anim svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, var(--surface) 100%);
+            z-index: 2;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 5;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--green);
+        }
+
+        .card-badge.amber-badge {
+            background: rgba(255, 184, 0, 0.1);
+            border-color: rgba(255, 184, 0, 0.3);
+            color: var(--amber);
+        }
+
+        .beta-tag {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: rgba(255, 59, 92, 0.15);
+            border: 1px solid rgba(255, 59, 92, 0.4);
+            color: var(--red);
+        }
+
+        .card-body {
+            padding: 32px 36px 40px;
+        }
+
+        .card-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 26px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: var(--text);
+            letter-spacing: 1px;
+        }
+
+        .card-name .accent {
+            color: var(--green);
+        }
+
+        .card-name .accent-amber {
+            color: var(--amber);
+        }
+
+        .card-tagline {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .card-features {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .feat {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feat::before {
+            content: '▸';
+            color: var(--green);
+            font-size: 10px;
+        }
+
+        .feat.amber::before {
+            color: var(--amber);
+        }
+
+        .card-cta {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: gap 0.2s;
+        }
+
+        .product-card:hover .card-cta {
+            gap: 20px;
+        }
+
+        .card-cta.amber-cta {
+            color: var(--amber);
+        }
+
+        .card-cta::after {
+            content: '→';
+            font-size: 16px;
+        }
+
+        /* SVG chart paths */
+        .chart-path-green {
+            fill: none;
+            stroke: var(--green);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 3s ease forwards 0.5s;
+        }
+
+        .chart-path-amber {
+            fill: none;
+            stroke: var(--amber);
+            stroke-width: 2;
+            filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.6));
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 3s ease forwards 0.5s;
+        }
+
+        .chart-area-green {
+            fill: url(#greenGrad);
+            opacity: 0.3;
+            stroke: none;
+            animation: fadeIn 3.5s ease forwards;
+        }
+
+        .chart-area-amber {
+            fill: url(#amberGrad);
+            opacity: 0.25;
+            stroke: none;
+            animation: fadeIn 3.5s ease forwards;
+        }
+
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 0.25;
+            }
+        }
+
+        /* Candlestick visual */
+        .candle {
+            display: inline-block;
+            width: 14px;
+            border-radius: 1px;
+            position: relative;
+            transition: height 1s ease;
+        }
+
+        /* ─── HOW IT WORKS ─── */
+        #how {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            margin-top: 64px;
+            border: 1px solid var(--border);
+        }
+
+        .how-step {
+            padding: 40px 32px;
+            border-right: 1px solid var(--border);
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .how-step:last-child {
+            border-right: none;
+        }
+
+        .how-step:hover {
+            background: rgba(0, 255, 136, 0.03);
+        }
+
+        .step-num {
+            font-family: 'Orbitron', monospace;
+            font-size: 48px;
+            font-weight: 900;
+            color: rgba(0, 255, 136, 0.08);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .step-icon {
+            font-size: 24px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .step-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+
+        /* ─── TECH ─── */
+        #tech {
+            padding: 100px 60px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .tech-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 32px;
+            transition: border-color 0.3s;
+        }
+
+        .tech-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .tech-card .tc-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .tech-card .tc-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .tech-card .tc-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--green);
+            text-shadow: var(--glow);
+        }
+
+        .footer-logo span {
+            color: var(--amber);
+        }
+
+        .footer-tagline {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .footer-right p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            line-height: 2;
+        }
+
+        .footer-right a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        /* ─── DIVIDER ─── */
+        .h-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--green), transparent);
+            opacity: 0.2;
+            margin: 0 60px;
+            width: calc(100% - 120px);
+        }
+
+        /* Animations on scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            nav {
+                padding: 0 24px;
+            }
+
+            section {
+                padding: 80px 24px;
+            }
+
+            #hero {
+                padding: 140px 24px 60px;
+            }
+
+            .vision-grid,
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .how-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 32px;
+                text-align: center;
+            }
+
+            .footer-right {
+                text-align: center;
+            }
+
+            .products-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .hero-stats {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+
+            nav .nav-links {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- TICKER BAR -->
-<div class="ticker-wrap">
-  <div class="ticker-label">LIVE FEED</div>
-  <div style="overflow:hidden;flex:1">
-    <div class="ticker-track">
-      <span class="ticker-item"><span class="sym">NIFTY50</span> 24,382.65 <span class="up">▲ +1.24%</span></span>
-      <span class="ticker-item"><span class="sym">BANKNIFTY</span> 52,140.80 <span class="up">▲ +0.87%</span></span>
-      <span class="ticker-item"><span class="sym">RELIANCE</span> 2,847.30 <span class="down">▼ -0.34%</span></span>
-      <span class="ticker-item"><span class="sym">TCS</span> 3,921.45 <span class="up">▲ +1.67%</span></span>
-      <span class="ticker-item"><span class="sym">HDFC</span> 1,743.20 <span class="down">▼ -0.21%</span></span>
-      <span class="ticker-item"><span class="sym">INFY</span> 1,584.75 <span class="up">▲ +2.03%</span></span>
-      <span class="ticker-item"><span class="sym">WIPRO</span> 498.60 <span class="up">▲ +0.55%</span></span>
-      <span class="ticker-item"><span class="sym">ICICIBANK</span> 1,231.90 <span class="down">▼ -0.78%</span></span>
-      <span class="ticker-item"><span class="sym">SBIN</span> 812.40 <span class="up">▲ +1.12%</span></span>
-      <span class="ticker-item"><span class="sym">ADANIENT</span> 2,765.00 <span class="down">▼ -1.45%</span></span>
-      <!-- duplicate for seamless loop -->
-      <span class="ticker-item"><span class="sym">NIFTY50</span> 24,382.65 <span class="up">▲ +1.24%</span></span>
-      <span class="ticker-item"><span class="sym">BANKNIFTY</span> 52,140.80 <span class="up">▲ +0.87%</span></span>
-      <span class="ticker-item"><span class="sym">RELIANCE</span> 2,847.30 <span class="down">▼ -0.34%</span></span>
-      <span class="ticker-item"><span class="sym">TCS</span> 3,921.45 <span class="up">▲ +1.67%</span></span>
-      <span class="ticker-item"><span class="sym">HDFC</span> 1,743.20 <span class="down">▼ -0.21%</span></span>
-      <span class="ticker-item"><span class="sym">INFY</span> 1,584.75 <span class="up">▲ +2.03%</span></span>
-      <span class="ticker-item"><span class="sym">WIPRO</span> 498.60 <span class="up">▲ +0.55%</span></span>
-      <span class="ticker-item"><span class="sym">ICICIBANK</span> 1,231.90 <span class="down">▼ -0.78%</span></span>
-    </div>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">NEX<span>ALPHA</span></a>
-  <ul class="nav-links">
-    <li><a href="#vision">Vision</a></li>
-    <li><a href="#products">Products</a></li>
-    <li><a href="#how">How It Works</a></li>
-    <li><a href="#tech">Technology</a></li>
-  </ul>
-  <a href="#products" class="nav-cta">Explore Products</a>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <!-- Animated BG chart SVG -->
-  <svg class="hero-bg-chart" viewBox="0 0 800 500" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id="heroGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#00ff88" stop-opacity="0.4"/>
-        <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <path d="M0,400 L80,360 L160,370 L240,290 L320,310 L400,200 L480,220 L560,140 L640,100 L720,80 L800,50 L800,500 L0,500 Z" fill="url(#heroGrad)"/>
-    <path d="M0,400 L80,360 L160,370 L240,290 L320,310 L400,200 L480,220 L560,140 L640,100 L720,80 L800,50" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.6"/>
-  </svg>
-
-  <div class="hero-content">
-    <div class="hero-tag">
-      <div class="blink"></div>
-      Multi-Agent Intelligence for Indian Markets
-    </div>
-
-    <h1>
-      <div class="line1">THE FUTURE OF</div>
-      <div class="line2">INTELLIGENT</div>
-      <div class="line3">MARKET ANALYSIS</div>
-    </h1>
-
-    <p class="hero-sub">
-      We are building <strong>AI-native investment systems</strong> that perceive, reason, and act on financial markets in real time — transforming how India trades options and discovers alpha.
-    </p>
-
-    <div class="hero-btns">
-      <a href="#products" class="btn-primary">See Our Products</a>
-      <a href="#vision" class="btn-secondary">Our Vision</a>
-    </div>
-
-    <div class="hero-stats">
-      <div class="stat-item">
-        <span class="val">NIFTY<br>50</span>
-        <span class="lbl">Primary Market</span>
-      </div>
-      <div class="stat-item">
-        <span class="val">2</span>
-        <span class="lbl">Live AI Products</span>
-      </div>
-      <div class="stat-item">
-        <span class="val">∞</span>
-        <span class="lbl">Agents Working</span>
-      </div>
-      <div class="stat-item">
-        <span class="val">24/7</span>
-        <span class="lbl">Market Intelligence</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- VISION -->
-<section id="vision">
-  <div class="section-tag">// Our Vision</div>
-  <h2 class="section-title">Built to <em>Transform</em> How India Invests</h2>
-  <p class="section-desc">The Indian financial market deserves intelligence that matches its complexity. We're building it.</p>
-
-  <div class="vision-grid">
-    <div class="vision-text reveal">
-      <p class="big">Markets that move in <span>milliseconds</span> demand systems that think in real time.</p>
-      <p>Traditional analysis tools are built for a slower world. We designed NexAlpha's products from the ground up for the velocity of modern markets — powered by collaborative multi-agent AI that monitors, analyzes, and surfaces insights continuously.</p>
-      <p>Our mission is simple: give every serious trader and investor in India access to the kind of intelligence that was previously available only to institutional desks.</p>
-      <p>Whether you're navigating Nifty50 derivatives or building a long-term equity portfolio, our systems bring clarity to complexity.</p>
-    </div>
-
-    <div class="terminal-box reveal">
-      <div class="tb-title">// nexalpha system // active agents</div>
-      <div class="t-line">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">agent.market_scanner.status()</span>
-        <span class="out val-up">● RUNNING — scanning 50 instruments</span>
-      </div>
-      <div class="t-line">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">agent.options_analyzer.status()</span>
-        <span class="out val-up">● RUNNING — monitoring OI shifts</span>
-      </div>
-      <div class="t-line">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">agent.equity_research.status()</span>
-        <span class="out val-up">● RUNNING — analyzing fundamentals</span>
-      </div>
-      <div class="t-line">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">agent.news_sentinel.status()</span>
-        <span class="out val-up">● RUNNING — parsing 240 sources</span>
-      </div>
-      <div class="t-line">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">agent.risk_monitor.status()</span>
-        <span class="out val-up">● RUNNING — risk within thresholds</span>
-      </div>
-      <div class="t-line" style="margin-top:16px">
-        <span class="prompt">SYS &gt;</span> <span class="cmd">insight.latest()</span>
-        <span class="out">NIFTY PCR ratio bullish. Theta decay elevated.</span>
-        <span class="out val-up">SIGNAL: Consider bull call spread 24200-24500 ↑</span>
-      </div>
-      <div class="t-line" style="margin-top:8px">
-        <span class="prompt">SYS &gt;</span> <span class="t-cursor"></span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PRODUCTS -->
-<section id="products">
-  <div class="products-header">
-    <div>
-      <div class="section-tag">// Our Products</div>
-      <h2 class="section-title">Intelligent Systems.<br><em>Real Results.</em></h2>
-    </div>
-    <div class="beta-notice">
-      <div class="dot"></div>
-      Beta Versions Live — V2 Coming Soon
-    </div>
-  </div>
-
-  <div class="products-grid">
-
-    <!-- OPTITRADE -->
-    <a href="<Paste your OptiTrade link here>" target="_blank" class="product-card" title="Launch OptiTrade">
-      <div class="card-visual">
-        <div class="beta-tag">BETA v0.1</div>
-        <div class="card-badge">F&O · OPTIONS</div>
-        <svg viewBox="0 0 600 260" style="position:absolute;inset:0;width:100%;height:100%">
-          <defs>
-            <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#00ff88" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- Grid lines -->
-          <line x1="0" y1="65" x2="600" y2="65" stroke="#00ff88" stroke-opacity="0.06" stroke-width="1"/>
-          <line x1="0" y1="130" x2="600" y2="130" stroke="#00ff88" stroke-opacity="0.06" stroke-width="1"/>
-          <line x1="0" y1="195" x2="600" y2="195" stroke="#00ff88" stroke-opacity="0.06" stroke-width="1"/>
-          <!-- Area fill -->
-          <path class="chart-area-green" d="M0,200 L60,170 L120,180 L180,130 L240,145 L300,85 L360,100 L420,55 L480,35 L540,20 L600,10 L600,260 L0,260 Z"/>
-          <!-- Line -->
-          <path class="chart-path-green" d="M0,200 L60,170 L120,180 L180,130 L240,145 L300,85 L360,100 L420,55 L480,35 L540,20 L600,10"/>
-          <!-- Dots -->
-          <circle cx="300" cy="85" r="4" fill="#00ff88" opacity="0.8"/>
-          <circle cx="480" cy="35" r="4" fill="#00ff88" opacity="0.8"/>
-          <circle cx="600" cy="10" r="5" fill="#00ff88"/>
-          <!-- Labels -->
-          <text x="8" y="258" font-family="Share Tech Mono" font-size="9" fill="#00ff88" opacity="0.4">NIFTY50 · F&O</text>
-          <text x="490" y="26" font-family="Share Tech Mono" font-size="9" fill="#00ff88">▲ +18.4%</text>
-          <!-- Candlesticks mini -->
-          <rect x="50" y="155" width="8" height="20" fill="#00ff88" opacity="0.7" rx="1"/>
-          <line x1="54" y1="148" x2="54" y2="180" stroke="#00ff88" stroke-width="1" opacity="0.5"/>
-          <rect x="100" y="162" width="8" height="25" fill="#ff3b5c" opacity="0.7" rx="1"/>
-          <line x1="104" y1="155" x2="104" y2="192" stroke="#ff3b5c" stroke-width="1" opacity="0.5"/>
-          <rect x="150" y="118" width="8" height="18" fill="#00ff88" opacity="0.7" rx="1"/>
-          <line x1="154" y1="110" x2="154" y2="142" stroke="#00ff88" stroke-width="1" opacity="0.5"/>
-        </svg>
-        <div class="card-visual-overlay"></div>
-      </div>
-      <div class="card-body">
-        <div class="card-tagline">Multi-Agent Options Trading Assistant</div>
-        <h3 class="card-name"><span class="accent">Opti</span>Trade</h3>
-        <p class="card-desc">A sophisticated multi-agent system purpose-built for Nifty50 options trading. Real-time market scanning, options chain analysis, and actionable F&O signals — all synthesized by collaborative AI agents.</p>
-        <div class="card-features">
-          <span class="feat">Real-time Nifty50 options chain monitoring</span>
-          <span class="feat">Multi-agent signal synthesis & validation</span>
-          <span class="feat">Open interest & IV analysis</span>
-          <span class="feat">Risk-calibrated trade recommendations</span>
-          <span class="feat">Live P&L tracking & Greeks dashboard</span>
+    <!-- TICKER BAR -->
+    <div class="ticker-wrap">
+        <div class="ticker-label">LIVE FEED</div>
+        <div style="overflow:hidden;flex:1">
+            <div class="ticker-track">
+                <span class="ticker-item"><span class="sym">NIFTY50</span> 24,382.65 <span class="up">▲
+                        +1.24%</span></span>
+                <span class="ticker-item"><span class="sym">BANKNIFTY</span> 52,140.80 <span class="up">▲
+                        +0.87%</span></span>
+                <span class="ticker-item"><span class="sym">RELIANCE</span> 2,847.30 <span class="down">▼
+                        -0.34%</span></span>
+                <span class="ticker-item"><span class="sym">TCS</span> 3,921.45 <span class="up">▲ +1.67%</span></span>
+                <span class="ticker-item"><span class="sym">HDFC</span> 1,743.20 <span class="down">▼
+                        -0.21%</span></span>
+                <span class="ticker-item"><span class="sym">INFY</span> 1,584.75 <span class="up">▲ +2.03%</span></span>
+                <span class="ticker-item"><span class="sym">WIPRO</span> 498.60 <span class="up">▲ +0.55%</span></span>
+                <span class="ticker-item"><span class="sym">ICICIBANK</span> 1,231.90 <span class="down">▼
+                        -0.78%</span></span>
+                <span class="ticker-item"><span class="sym">SBIN</span> 812.40 <span class="up">▲ +1.12%</span></span>
+                <span class="ticker-item"><span class="sym">ADANIENT</span> 2,765.00 <span class="down">▼
+                        -1.45%</span></span>
+                <!-- duplicate for seamless loop -->
+                <span class="ticker-item"><span class="sym">NIFTY50</span> 24,382.65 <span class="up">▲
+                        +1.24%</span></span>
+                <span class="ticker-item"><span class="sym">BANKNIFTY</span> 52,140.80 <span class="up">▲
+                        +0.87%</span></span>
+                <span class="ticker-item"><span class="sym">RELIANCE</span> 2,847.30 <span class="down">▼
+                        -0.34%</span></span>
+                <span class="ticker-item"><span class="sym">TCS</span> 3,921.45 <span class="up">▲ +1.67%</span></span>
+                <span class="ticker-item"><span class="sym">HDFC</span> 1,743.20 <span class="down">▼
+                        -0.21%</span></span>
+                <span class="ticker-item"><span class="sym">INFY</span> 1,584.75 <span class="up">▲ +2.03%</span></span>
+                <span class="ticker-item"><span class="sym">WIPRO</span> 498.60 <span class="up">▲ +0.55%</span></span>
+                <span class="ticker-item"><span class="sym">ICICIBANK</span> 1,231.90 <span class="down">▼
+                        -0.78%</span></span>
+            </div>
         </div>
-        <div class="card-cta">Launch OptiTrade</div>
-      </div>
-    </a>
+    </div>
 
-    <!-- BHARATALPHA -->
-    <a href="<Paste your BharatAlpha link here>" target="_blank" class="product-card amber" title="Launch BharatAlpha">
-      <div class="card-visual" style="background:#040a08">
-        <div class="beta-tag">BETA v0.1</div>
-        <div class="card-badge amber-badge">EQUITY · RESEARCH</div>
-        <svg viewBox="0 0 600 260" style="position:absolute;inset:0;width:100%;height:100%">
-          <defs>
-            <linearGradient id="amberGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ffb800" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#ffb800" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- Grid -->
-          <line x1="0" y1="65" x2="600" y2="65" stroke="#ffb800" stroke-opacity="0.06" stroke-width="1"/>
-          <line x1="0" y1="130" x2="600" y2="130" stroke="#ffb800" stroke-opacity="0.06" stroke-width="1"/>
-          <line x1="0" y1="195" x2="600" y2="195" stroke="#ffb800" stroke-opacity="0.06" stroke-width="1"/>
-          <!-- Multiple stock lines -->
-          <path class="chart-area-amber" d="M0,180 L80,150 L160,160 L240,110 L320,125 L400,70 L480,50 L560,30 L600,20 L600,260 L0,260 Z"/>
-          <path class="chart-path-amber" d="M0,180 L80,150 L160,160 L240,110 L320,125 L400,70 L480,50 L560,30 L600,20"/>
-          <!-- Second line -->
-          <path d="M0,220 L80,200 L160,210 L240,175 L320,190 L400,150 L480,140 L560,120 L600,115" fill="none" stroke="#ffb800" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4,4"/>
-          <!-- Labels -->
-          <text x="8" y="258" font-family="Share Tech Mono" font-size="9" fill="#ffb800" opacity="0.4">BSE · NSE · INDIA</text>
-          <text x="490" y="42" font-family="Share Tech Mono" font-size="9" fill="#ffb800">▲ +23.1%</text>
-          <!-- Horizontal data bars -->
-          <rect x="410" y="80" width="60" height="6" fill="#ffb800" opacity="0.5" rx="1"/>
-          <rect x="410" y="92" width="40" height="6" fill="#ffb800" opacity="0.3" rx="1"/>
-          <rect x="410" y="104" width="80" height="6" fill="#ffb800" opacity="0.4" rx="1"/>
-          <text x="410" y="74" font-family="Share Tech Mono" font-size="8" fill="#ffb800" opacity="0.5">PE RATIO</text>
+    <!-- NAV -->
+    <nav>
+        <a href="#" class="nav-logo">NEX<span>ALPHA</span></a>
+        <ul class="nav-links">
+            <li><a href="#vision">Vision</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#tech">Technology</a></li>
+        </ul>
+        <a href="#products" class="nav-cta">Explore Products</a>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero">
+        <!-- Animated BG chart SVG -->
+        <svg class="hero-bg-chart" viewBox="0 0 800 500" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="heroGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#00ff88" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#00ff88" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+            <path
+                d="M0,400 L80,360 L160,370 L240,290 L320,310 L400,200 L480,220 L560,140 L640,100 L720,80 L800,50 L800,500 L0,500 Z"
+                fill="url(#heroGrad)" />
+            <path d="M0,400 L80,360 L160,370 L240,290 L320,310 L400,200 L480,220 L560,140 L640,100 L720,80 L800,50"
+                fill="none" stroke="#00ff88" stroke-width="2" opacity="0.6" />
         </svg>
-        <div class="card-visual-overlay" style="background: linear-gradient(to bottom, transparent 50%, var(--surface) 100%)"></div>
-      </div>
-      <div class="card-body">
-        <div class="card-tagline">AI Equity Research & Intelligence Platform</div>
-        <h3 class="card-name"><span class="accent-amber">Bharat</span>Alpha</h3>
-        <p class="card-desc">A deep equity research and intelligence platform built specifically for the Indian market. Fundamental analysis, sector intelligence, and company insights — powered by AI trained on the nuances of Indian business.</p>
-        <div class="card-features">
-          <span class="feat amber">BSE & NSE comprehensive coverage</span>
-          <span class="feat amber">AI-driven fundamental & technical analysis</span>
-          <span class="feat amber">Sector rotation & macro intelligence</span>
-          <span class="feat amber">Company-specific research reports</span>
-          <span class="feat amber">Portfolio screening & risk assessment</span>
+
+        <div class="hero-content">
+            <div class="hero-tag">
+                <div class="blink"></div>
+                Multi-Agent Intelligence for Indian Markets
+            </div>
+
+            <h1>
+                <div class="line1">THE FUTURE OF</div>
+                <div class="line2">INTELLIGENT</div>
+                <div class="line3">MARKET ANALYSIS</div>
+            </h1>
+
+            <p class="hero-sub">
+                We are building <strong>AI-native investment systems</strong> that perceive, reason, and act on
+                financial markets in real time — transforming how India trades options and discovers alpha.
+            </p>
+
+            <div class="hero-btns">
+                <a href="#products" class="btn-primary">See Our Products</a>
+                <a href="#vision" class="btn-secondary">Our Vision</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="val">NIFTY<br>50</span>
+                    <span class="lbl">Primary Market</span>
+                </div>
+                <div class="stat-item">
+                    <span class="val">2</span>
+                    <span class="lbl">Live AI Products</span>
+                </div>
+                <div class="stat-item">
+                    <span class="val">∞</span>
+                    <span class="lbl">Agents Working</span>
+                </div>
+                <div class="stat-item">
+                    <span class="val">24/7</span>
+                    <span class="lbl">Market Intelligence</span>
+                </div>
+            </div>
         </div>
-        <div class="card-cta amber-cta">Launch BharatAlpha</div>
-      </div>
-    </a>
+    </section>
 
-  </div>
+    <!-- VISION -->
+    <section id="vision">
+        <div class="section-tag">// Our Vision</div>
+        <h2 class="section-title">Built to <em>Transform</em> How India Invests</h2>
+        <p class="section-desc">The Indian financial market deserves intelligence that matches its complexity. We're
+            building it.</p>
 
-  <!-- BETA WARNING BANNER -->
-  <div style="margin-top: 24px; background: rgba(255,184,0,0.04); border: 1px solid rgba(255,184,0,0.2); padding: 20px 32px; display: flex; align-items: center; gap: 20px;">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L18 17H2L10 2Z" stroke="#ffb800" stroke-width="1.5"/><line x1="10" y1="8" x2="10" y2="12" stroke="#ffb800" stroke-width="1.5"/><circle cx="10" cy="14.5" r="0.75" fill="#ffb800"/></svg>
-    <p style="font-family:'Share Tech Mono',monospace; font-size:12px; color: #a08040; letter-spacing:1px; line-height:1.6;">
-      <strong style="color:var(--amber)">BETA NOTICE:</strong> Both OptiTrade and BharatAlpha are currently in beta. Features and interfaces are actively evolving. 
-      Next-generation versions with expanded capabilities, deeper agent collaboration, and enhanced accuracy are currently in development.
-    </p>
-  </div>
-</section>
+        <div class="vision-grid">
+            <div class="vision-text reveal">
+                <p class="big">Markets that move in <span>milliseconds</span> demand systems that think in real time.
+                </p>
+                <p>Traditional analysis tools are built for a slower world. We designed NexAlpha's products from the
+                    ground up for the velocity of modern markets — powered by collaborative multi-agent AI that
+                    monitors, analyzes, and surfaces insights continuously.</p>
+                <p>Our mission is simple: give every serious trader and investor in India access to the kind of
+                    intelligence that was previously available only to institutional desks.</p>
+                <p>Whether you're navigating Nifty50 derivatives or building a long-term equity portfolio, our systems
+                    bring clarity to complexity.</p>
+            </div>
 
-<!-- HOW IT WORKS -->
-<section id="how">
-  <div class="section-tag">// How It Works</div>
-  <h2 class="section-title">Intelligence in <em>Four Layers</em></h2>
-  <p class="section-desc">Our multi-agent architecture breaks complex financial analysis into specialized intelligent agents working in parallel.</p>
+            <div class="terminal-box reveal">
+                <div class="tb-title">// nexalpha system // active agents</div>
+                <div class="t-line">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">agent.market_scanner.status()</span>
+                    <span class="out val-up">● RUNNING — scanning 50 instruments</span>
+                </div>
+                <div class="t-line">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">agent.options_analyzer.status()</span>
+                    <span class="out val-up">● RUNNING — monitoring OI shifts</span>
+                </div>
+                <div class="t-line">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">agent.equity_research.status()</span>
+                    <span class="out val-up">● RUNNING — analyzing fundamentals</span>
+                </div>
+                <div class="t-line">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">agent.news_sentinel.status()</span>
+                    <span class="out val-up">● RUNNING — parsing 240 sources</span>
+                </div>
+                <div class="t-line">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">agent.risk_monitor.status()</span>
+                    <span class="out val-up">● RUNNING — risk within thresholds</span>
+                </div>
+                <div class="t-line" style="margin-top:16px">
+                    <span class="prompt">SYS &gt;</span> <span class="cmd">insight.latest()</span>
+                    <span class="out">NIFTY PCR ratio bullish. Theta decay elevated.</span>
+                    <span class="out val-up">SIGNAL: Consider bull call spread 24200-24500 ↑</span>
+                </div>
+                <div class="t-line" style="margin-top:8px">
+                    <span class="prompt">SYS &gt;</span> <span class="t-cursor"></span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <div class="how-grid reveal">
-    <div class="how-step">
-      <div class="step-num">01</div>
-      <span class="step-icon">⚡</span>
-      <div class="step-title">Data Ingestion</div>
-      <p class="step-desc">Real-time market feeds, options chain data, news, filings, and macro indicators are continuously ingested and normalized for agent consumption.</p>
-    </div>
-    <div class="how-step">
-      <div class="step-num">02</div>
-      <span class="step-icon">🧠</span>
-      <div class="step-title">Agent Analysis</div>
-      <p class="step-desc">Specialized AI agents analyze their domain — options, fundamentals, technicals, sentiment — simultaneously, each contributing a unique analytical perspective.</p>
-    </div>
-    <div class="how-step">
-      <div class="step-num">03</div>
-      <span class="step-icon">🔗</span>
-      <div class="step-title">Multi-Agent Synthesis</div>
-      <p class="step-desc">A coordinating intelligence aggregates agent outputs, resolves conflicts, validates signals, and produces high-confidence, multi-dimensional market views.</p>
-    </div>
-    <div class="how-step">
-      <div class="step-num">04</div>
-      <span class="step-icon">🎯</span>
-      <div class="step-title">Actionable Insight</div>
-      <p class="step-desc">Clear, context-rich insights and trade recommendations are delivered to you — with reasoning, risk parameters, and confidence levels fully transparent.</p>
-    </div>
-  </div>
-</section>
+    <!-- PRODUCTS -->
+    <section id="products">
+        <div class="products-header">
+            <div>
+                <div class="section-tag">// Our Products</div>
+                <h2 class="section-title">Intelligent Systems.<br><em>Real Results.</em></h2>
+            </div>
+            <div class="beta-notice">
+                <div class="dot"></div>
+                Beta Versions Live — V2 Coming Soon
+            </div>
+        </div>
 
-<!-- TECH -->
-<section id="tech">
-  <div class="section-tag">// Technology</div>
-  <h2 class="section-title">What Powers <em>NexAlpha</em></h2>
-  <p class="section-desc">Built on a foundation of cutting-edge AI systems designed for the speed and precision demanded by financial markets.</p>
+        <div class="products-grid">
 
-  <div class="tech-grid reveal">
-    <div class="tech-card">
-      <div class="tc-label">Architecture</div>
-      <div class="tc-title">Multi-Agent Systems</div>
-      <p class="tc-desc">Purpose-designed agents with specialized expertise collaborate in real time — no single model bottleneck, continuous parallelized intelligence.</p>
-    </div>
-    <div class="tech-card">
-      <div class="tc-label">Intelligence</div>
-      <div class="tc-title">Large Language Models</div>
-      <p class="tc-desc">State-of-the-art LLMs trained to understand market language, interpret financial data, and reason across complex multi-variable scenarios.</p>
-    </div>
-    <div class="tech-card">
-      <div class="tc-label">Data Layer</div>
-      <div class="tc-title">Real-Time Market Feeds</div>
-      <p class="tc-desc">Live integration with Indian exchange data — options chains, order flow, price action, and corporate events — processed at market speed.</p>
-    </div>
-    <div class="tech-card">
-      <div class="tc-label">Safety</div>
-      <div class="tc-title">Risk Intelligence</div>
-      <p class="tc-desc">Every recommendation is filtered through risk agents that validate position sizing, drawdown limits, and portfolio exposure before surfacing to users.</p>
-    </div>
-    <div class="tech-card">
-      <div class="tc-label">Research</div>
-      <div class="tc-title">Deep Fundamental Engine</div>
-      <p class="tc-desc">Automated parsing and synthesis of annual reports, DRHP filings, concall transcripts, and sector reports — at scale, in real time.</p>
-    </div>
-    <div class="tech-card">
-      <div class="tc-label">Roadmap</div>
-      <div class="tc-title">Next-Gen Versions</div>
-      <p class="tc-desc">V2 of both platforms is in active development — with broader instrument coverage, predictive agent capabilities, and enhanced portfolio intelligence.</p>
-    </div>
-  </div>
-</section>
+            <!-- OPTITRADE -->
+            <a href="http://optitrade-alb-1721764571.ap-south-1.elb.amazonaws.com/" target="_blank" class="product-card"
+                title="Launch OptiTrade">
+                <div class="card-visual">
+                    <div class="beta-tag">BETA v0.1</div>
+                    <div class="card-badge">F&O · OPTIONS</div>
+                    <svg viewBox="0 0 600 260" style="position:absolute;inset:0;width:100%;height:100%">
+                        <defs>
+                            <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#00ff88" stop-opacity="0.5" />
+                                <stop offset="100%" stop-color="#00ff88" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid lines -->
+                        <line x1="0" y1="65" x2="600" y2="65" stroke="#00ff88" stroke-opacity="0.06" stroke-width="1" />
+                        <line x1="0" y1="130" x2="600" y2="130" stroke="#00ff88" stroke-opacity="0.06"
+                            stroke-width="1" />
+                        <line x1="0" y1="195" x2="600" y2="195" stroke="#00ff88" stroke-opacity="0.06"
+                            stroke-width="1" />
+                        <!-- Area fill -->
+                        <path class="chart-area-green"
+                            d="M0,200 L60,170 L120,180 L180,130 L240,145 L300,85 L360,100 L420,55 L480,35 L540,20 L600,10 L600,260 L0,260 Z" />
+                        <!-- Line -->
+                        <path class="chart-path-green"
+                            d="M0,200 L60,170 L120,180 L180,130 L240,145 L300,85 L360,100 L420,55 L480,35 L540,20 L600,10" />
+                        <!-- Dots -->
+                        <circle cx="300" cy="85" r="4" fill="#00ff88" opacity="0.8" />
+                        <circle cx="480" cy="35" r="4" fill="#00ff88" opacity="0.8" />
+                        <circle cx="600" cy="10" r="5" fill="#00ff88" />
+                        <!-- Labels -->
+                        <text x="8" y="258" font-family="Share Tech Mono" font-size="9" fill="#00ff88"
+                            opacity="0.4">NIFTY50 · F&O</text>
+                        <text x="490" y="26" font-family="Share Tech Mono" font-size="9" fill="#00ff88">▲ +18.4%</text>
+                        <!-- Candlesticks mini -->
+                        <rect x="50" y="155" width="8" height="20" fill="#00ff88" opacity="0.7" rx="1" />
+                        <line x1="54" y1="148" x2="54" y2="180" stroke="#00ff88" stroke-width="1" opacity="0.5" />
+                        <rect x="100" y="162" width="8" height="25" fill="#ff3b5c" opacity="0.7" rx="1" />
+                        <line x1="104" y1="155" x2="104" y2="192" stroke="#ff3b5c" stroke-width="1" opacity="0.5" />
+                        <rect x="150" y="118" width="8" height="18" fill="#00ff88" opacity="0.7" rx="1" />
+                        <line x1="154" y1="110" x2="154" y2="142" stroke="#00ff88" stroke-width="1" opacity="0.5" />
+                    </svg>
+                    <div class="card-visual-overlay"></div>
+                </div>
+                <div class="card-body">
+                    <div class="card-tagline">Multi-Agent Options Trading Assistant</div>
+                    <h3 class="card-name"><span class="accent">Opti</span>Trade</h3>
+                    <p class="card-desc">A sophisticated multi-agent system purpose-built for Nifty50 options trading.
+                        Real-time market scanning, options chain analysis, and actionable F&O signals — all synthesized
+                        by collaborative AI agents.</p>
+                    <div class="card-features">
+                        <span class="feat">Real-time Nifty50 options chain monitoring</span>
+                        <span class="feat">Multi-agent signal synthesis & validation</span>
+                        <span class="feat">Open interest & IV analysis</span>
+                        <span class="feat">Risk-calibrated trade recommendations</span>
+                        <span class="feat">Live P&L tracking & Greeks dashboard</span>
+                    </div>
+                    <div class="card-cta">Launch OptiTrade</div>
+                </div>
+            </a>
 
-<!-- CTA SECTION -->
-<section style="text-align:center; padding: 80px 60px; background: var(--surface); border-top: 1px solid var(--border);">
-  <div class="section-tag" style="justify-content:center; display:flex; margin-bottom:16px">// Ready to Trade Smarter?</div>
-  <h2 class="section-title" style="max-width:600px; margin:0 auto 20px">Your <em>Edge</em> in the Indian Market Starts Here</h2>
-  <p class="section-desc" style="margin: 0 auto 40px">Both products are live and accessible today. Join our beta and be among the first to experience AI-native market intelligence.</p>
-  <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-    <a href="<Paste your OptiTrade link here>" target="_blank" class="btn-primary">Launch OptiTrade</a>
-    <a href="<Paste your BharatAlpha link here>" target="_blank" class="btn-secondary">Launch BharatAlpha</a>
-  </div>
-</section>
+            <!-- BHARATALPHA -->
+            <a href="http://bharatalpha-alb-97091621.ap-south-1.elb.amazonaws.com/" target="_blank"
+                class="product-card amber" title="Launch BharatAlpha">
+                <div class="card-visual" style="background:#040a08">
+                    <div class="beta-tag">BETA v0.1</div>
+                    <div class="card-badge amber-badge">EQUITY · RESEARCH</div>
+                    <svg viewBox="0 0 600 260" style="position:absolute;inset:0;width:100%;height:100%">
+                        <defs>
+                            <linearGradient id="amberGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ffb800" stop-opacity="0.5" />
+                                <stop offset="100%" stop-color="#ffb800" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid -->
+                        <line x1="0" y1="65" x2="600" y2="65" stroke="#ffb800" stroke-opacity="0.06" stroke-width="1" />
+                        <line x1="0" y1="130" x2="600" y2="130" stroke="#ffb800" stroke-opacity="0.06"
+                            stroke-width="1" />
+                        <line x1="0" y1="195" x2="600" y2="195" stroke="#ffb800" stroke-opacity="0.06"
+                            stroke-width="1" />
+                        <!-- Multiple stock lines -->
+                        <path class="chart-area-amber"
+                            d="M0,180 L80,150 L160,160 L240,110 L320,125 L400,70 L480,50 L560,30 L600,20 L600,260 L0,260 Z" />
+                        <path class="chart-path-amber"
+                            d="M0,180 L80,150 L160,160 L240,110 L320,125 L400,70 L480,50 L560,30 L600,20" />
+                        <!-- Second line -->
+                        <path d="M0,220 L80,200 L160,210 L240,175 L320,190 L400,150 L480,140 L560,120 L600,115"
+                            fill="none" stroke="#ffb800" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4,4" />
+                        <!-- Labels -->
+                        <text x="8" y="258" font-family="Share Tech Mono" font-size="9" fill="#ffb800" opacity="0.4">BSE
+                            · NSE · INDIA</text>
+                        <text x="490" y="42" font-family="Share Tech Mono" font-size="9" fill="#ffb800">▲ +23.1%</text>
+                        <!-- Horizontal data bars -->
+                        <rect x="410" y="80" width="60" height="6" fill="#ffb800" opacity="0.5" rx="1" />
+                        <rect x="410" y="92" width="40" height="6" fill="#ffb800" opacity="0.3" rx="1" />
+                        <rect x="410" y="104" width="80" height="6" fill="#ffb800" opacity="0.4" rx="1" />
+                        <text x="410" y="74" font-family="Share Tech Mono" font-size="8" fill="#ffb800" opacity="0.5">PE
+                            RATIO</text>
+                    </svg>
+                    <div class="card-visual-overlay"
+                        style="background: linear-gradient(to bottom, transparent 50%, var(--surface) 100%)"></div>
+                </div>
+                <div class="card-body">
+                    <div class="card-tagline">AI Equity Research & Intelligence Platform</div>
+                    <h3 class="card-name"><span class="accent-amber">Bharat</span>Alpha</h3>
+                    <p class="card-desc">A deep equity research and intelligence platform built specifically for the
+                        Indian market. Fundamental analysis, sector intelligence, and company insights — powered by AI
+                        trained on the nuances of Indian business.</p>
+                    <div class="card-features">
+                        <span class="feat amber">BSE & NSE comprehensive coverage</span>
+                        <span class="feat amber">AI-driven fundamental & technical analysis</span>
+                        <span class="feat amber">Sector rotation & macro intelligence</span>
+                        <span class="feat amber">Company-specific research reports</span>
+                        <span class="feat amber">Portfolio screening & risk assessment</span>
+                    </div>
+                    <div class="card-cta amber-cta">Launch BharatAlpha</div>
+                </div>
+            </a>
 
-<!-- FOOTER -->
-<footer>
-  <div>
-    <div class="footer-logo">NEX<span>ALPHA</span></div>
-    <div class="footer-tagline">Intelligent Market Systems · India</div>
-  </div>
-  <div class="footer-right">
-    <p>Powered by Multi-Agent AI Technology</p>
-    <p>OptiTrade · BharatAlpha</p>
-    <p style="margin-top:8px; font-size:10px;">© 2025 NexAlpha. All rights reserved.</p>
-    <p style="font-size:10px; margin-top:4px; color: #3a5060;">For informational purposes only. Not financial advice.</p>
-  </div>
-</footer>
+        </div>
 
-<script>
-  // Scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) e.target.classList.add('visible');
-    });
-  }, { threshold: 0.1 });
-  reveals.forEach(r => obs.observe(r));
+        <!-- BETA WARNING BANNER -->
+        <div
+            style="margin-top: 24px; background: rgba(255,184,0,0.04); border: 1px solid rgba(255,184,0,0.2); padding: 20px 32px; display: flex; align-items: center; gap: 20px;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2L18 17H2L10 2Z" stroke="#ffb800" stroke-width="1.5" />
+                <line x1="10" y1="8" x2="10" y2="12" stroke="#ffb800" stroke-width="1.5" />
+                <circle cx="10" cy="14.5" r="0.75" fill="#ffb800" />
+            </svg>
+            <p
+                style="font-family:'Share Tech Mono',monospace; font-size:12px; color: #a08040; letter-spacing:1px; line-height:1.6;">
+                <strong style="color:var(--amber)">BETA NOTICE:</strong> Both OptiTrade and BharatAlpha are currently in
+                beta. Features and interfaces are actively evolving.
+                Next-generation versions with expanded capabilities, deeper agent collaboration, and enhanced accuracy
+                are currently in development.
+            </p>
+        </div>
+    </section>
 
-  // Animate stats on scroll
-  document.querySelectorAll('.stat-item .val').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(10px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-  });
-  const heroObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        document.querySelectorAll('.stat-item .val').forEach((el, i) => {
-          setTimeout(() => {
-            el.style.opacity = '1';
-            el.style.transform = 'none';
-          }, i * 150);
+    <!-- HOW IT WORKS -->
+    <section id="how">
+        <div class="section-tag">// How It Works</div>
+        <h2 class="section-title">Intelligence in <em>Four Layers</em></h2>
+        <p class="section-desc">Our multi-agent architecture breaks complex financial analysis into specialized
+            intelligent agents working in parallel.</p>
+
+        <div class="how-grid reveal">
+            <div class="how-step">
+                <div class="step-num">01</div>
+                <span class="step-icon">⚡</span>
+                <div class="step-title">Data Ingestion</div>
+                <p class="step-desc">Real-time market feeds, options chain data, news, filings, and macro indicators are
+                    continuously ingested and normalized for agent consumption.</p>
+            </div>
+            <div class="how-step">
+                <div class="step-num">02</div>
+                <span class="step-icon">🧠</span>
+                <div class="step-title">Agent Analysis</div>
+                <p class="step-desc">Specialized AI agents analyze their domain — options, fundamentals, technicals,
+                    sentiment — simultaneously, each contributing a unique analytical perspective.</p>
+            </div>
+            <div class="how-step">
+                <div class="step-num">03</div>
+                <span class="step-icon">🔗</span>
+                <div class="step-title">Multi-Agent Synthesis</div>
+                <p class="step-desc">A coordinating intelligence aggregates agent outputs, resolves conflicts, validates
+                    signals, and produces high-confidence, multi-dimensional market views.</p>
+            </div>
+            <div class="how-step">
+                <div class="step-num">04</div>
+                <span class="step-icon">🎯</span>
+                <div class="step-title">Actionable Insight</div>
+                <p class="step-desc">Clear, context-rich insights and trade recommendations are delivered to you — with
+                    reasoning, risk parameters, and confidence levels fully transparent.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TECH -->
+    <section id="tech">
+        <div class="section-tag">// Technology</div>
+        <h2 class="section-title">What Powers <em>NexAlpha</em></h2>
+        <p class="section-desc">Built on a foundation of cutting-edge AI systems designed for the speed and precision
+            demanded by financial markets.</p>
+
+        <div class="tech-grid reveal">
+            <div class="tech-card">
+                <div class="tc-label">Architecture</div>
+                <div class="tc-title">Multi-Agent Systems</div>
+                <p class="tc-desc">Purpose-designed agents with specialized expertise collaborate in real time — no
+                    single model bottleneck, continuous parallelized intelligence.</p>
+            </div>
+            <div class="tech-card">
+                <div class="tc-label">Intelligence</div>
+                <div class="tc-title">Large Language Models</div>
+                <p class="tc-desc">State-of-the-art LLMs trained to understand market language, interpret financial
+                    data, and reason across complex multi-variable scenarios.</p>
+            </div>
+            <div class="tech-card">
+                <div class="tc-label">Data Layer</div>
+                <div class="tc-title">Real-Time Market Feeds</div>
+                <p class="tc-desc">Live integration with Indian exchange data — options chains, order flow, price
+                    action, and corporate events — processed at market speed.</p>
+            </div>
+            <div class="tech-card">
+                <div class="tc-label">Safety</div>
+                <div class="tc-title">Risk Intelligence</div>
+                <p class="tc-desc">Every recommendation is filtered through risk agents that validate position sizing,
+                    drawdown limits, and portfolio exposure before surfacing to users.</p>
+            </div>
+            <div class="tech-card">
+                <div class="tc-label">Research</div>
+                <div class="tc-title">Deep Fundamental Engine</div>
+                <p class="tc-desc">Automated parsing and synthesis of annual reports, DRHP filings, concall transcripts,
+                    and sector reports — at scale, in real time.</p>
+            </div>
+            <div class="tech-card">
+                <div class="tc-label">Roadmap</div>
+                <div class="tc-title">Next-Gen Versions</div>
+                <p class="tc-desc">V2 of both platforms is in active development — with broader instrument coverage,
+                    predictive agent capabilities, and enhanced portfolio intelligence.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section
+        style="text-align:center; padding: 80px 60px; background: var(--surface); border-top: 1px solid var(--border);">
+        <div class="section-tag" style="justify-content:center; display:flex; margin-bottom:16px">// Ready to Trade
+            Smarter?</div>
+        <h2 class="section-title" style="max-width:600px; margin:0 auto 20px">Your <em>Edge</em> in the Indian Market
+            Starts Here</h2>
+        <p class="section-desc" style="margin: 0 auto 40px">Both products are live and accessible today. Join our beta
+            and be among the first to experience AI-native market intelligence.</p>
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+            <a href="http://optitrade-alb-1721764571.ap-south-1.elb.amazonaws.com/" target="_blank"
+                class="btn-primary">Launch OptiTrade</a>
+            <a href="http://bharatalpha-alb-97091621.ap-south-1.elb.amazonaws.com/" target="_blank"
+                class="btn-secondary">Launch BharatAlpha</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <div class="footer-logo">NEX<span>ALPHA</span></div>
+            <div class="footer-tagline">Intelligent Market Systems · India</div>
+        </div>
+        <div class="footer-right">
+            <p>Powered by Multi-Agent AI Technology</p>
+            <p>OptiTrade · BharatAlpha</p>
+            <p style="margin-top:8px; font-size:10px;">© 2025 NexAlpha. All rights reserved.</p>
+            <p style="font-size:10px; margin-top:4px; color: #3a5060;">For informational purposes only. Not financial
+                advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll reveal
+        const reveals = document.querySelectorAll('.reveal');
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) e.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(r => obs.observe(r));
+
+        // Animate stats on scroll
+        document.querySelectorAll('.stat-item .val').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(10px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         });
-      }
-    });
-  }, { threshold: 0.3 });
-  const stats = document.querySelector('.hero-stats');
-  if (stats) heroObs.observe(stats);
+        const heroObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    document.querySelectorAll('.stat-item .val').forEach((el, i) => {
+                        setTimeout(() => {
+                            el.style.opacity = '1';
+                            el.style.transform = 'none';
+                        }, i * 150);
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+        const stats = document.querySelector('.hero-stats');
+        if (stats) heroObs.observe(stats);
 
-  // Custom cursor glow
-  const cursor = document.createElement('div');
-  cursor.style.cssText = `
+        // Custom cursor glow
+        const cursor = document.createElement('div');
+        cursor.style.cssText = `
     position: fixed;
     width: 20px;
     height: 20px;
@@ -1314,25 +1527,26 @@
     transition: all 0.1s ease;
     mix-blend-mode: screen;
   `;
-  document.body.appendChild(cursor);
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-  });
+        document.body.appendChild(cursor);
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
 
-  // Hover effects for product cards
-  document.querySelectorAll('.product-card').forEach(card => {
-    card.addEventListener('mouseenter', () => {
-      cursor.style.width = '40px';
-      cursor.style.height = '40px';
-      cursor.style.borderColor = 'rgba(0,255,136,0.8)';
-    });
-    card.addEventListener('mouseleave', () => {
-      cursor.style.width = '20px';
-      cursor.style.height = '20px';
-      cursor.style.borderColor = 'rgba(0,255,136,0.5)';
-    });
-  });
-</script>
+        // Hover effects for product cards
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                cursor.style.width = '40px';
+                cursor.style.height = '40px';
+                cursor.style.borderColor = 'rgba(0,255,136,0.8)';
+            });
+            card.addEventListener('mouseleave', () => {
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursor.style.borderColor = 'rgba(0,255,136,0.5)';
+            });
+        });
+    </script>
 </body>
+
 </html>
