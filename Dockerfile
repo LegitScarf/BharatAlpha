@@ -19,10 +19,6 @@
 
 FROM python:3.11-slim
 
-# ── System dependencies ───────────────────────────────────────
-# Build tools needed at pip-install time (lxml, cryptography, grpcio).
-# We purge them afterwards in the same RUN layer so they don't
-# bloat the final image — only the compiled .so files remain.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -48,16 +44,8 @@ RUN groupadd -r bharatalpha && \
 # ── Python dependencies ───────────────────────────────────────
 WORKDIR /app
 
-# Copy requirements first so pip layer is cached independently
-# of application code changes.
 COPY requirements.txt .
 
-# Install into the system Python (no venv needed in single-stage).
-# --no-cache-dir keeps image lean.
-# IMPORTANT: apt-get purge --auto-remove removes setuptools because
-# apt does not know pip installed it. We must reinstall setuptools
-# AFTER the purge so pkg_resources is available at runtime.
-# CrewAI telemetry.py imports pkg_resources at module load time.
 RUN pip install --no-cache-dir -r requirements.txt && \
     apt-get purge -y --auto-remove \
     build-essential gcc g++ \

@@ -236,14 +236,24 @@ def get_angel_ltp(symbol: str, exchange: str = "NSE") -> Dict[str, Any]:
         token = None
         if search_resp and is_api_success(search_resp):
             scrips = search_resp.get("data") or []
+            # Angel One returns SYMBOL-EQ (equity), SYMBOL-BE (trade-to-trade),
+            # SYMBOL-AF, SYMBOL-BL etc. Always prefer -EQ first.
+            eq_symbol = f"{symbol}-EQ"
             for scrip in scrips:
-                if scrip.get("tradingsymbol") == symbol:
+                if scrip.get("tradingsymbol") == eq_symbol:
                     token = scrip.get("symboltoken")
                     break
+            # Fallback: exact match, then first NSE result
+            if not token:
+                for scrip in scrips:
+                    if scrip.get("tradingsymbol") == symbol:
+                        token = scrip.get("symboltoken")
+                        break
+            if not token and scrips:
+                token = scrips[0].get("symboltoken")
 
         if not token:
             _dq.add_warning("angel_ltp", f"Token not found for {symbol}, trying direct fetch")
-            # Fallback: try without token (some symbols work with just name)
             return {
                 "status":  "failed",
                 "error":   "token_not_found",
@@ -307,10 +317,19 @@ def get_angel_quote(symbol: str, exchange: str = "NSE") -> Dict[str, Any]:
         search_resp = safe_parse_response(_smart_api.searchScrip(exchange, symbol))
         token = None
         if search_resp and is_api_success(search_resp):
-            for scrip in (search_resp.get("data") or []):
-                if scrip.get("tradingsymbol") == symbol:
+            scrips = search_resp.get("data") or []
+            eq_symbol = f"{symbol}-EQ"
+            for scrip in scrips:
+                if scrip.get("tradingsymbol") == eq_symbol:
                     token = scrip.get("symboltoken")
                     break
+            if not token:
+                for scrip in scrips:
+                    if scrip.get("tradingsymbol") == symbol:
+                        token = scrip.get("symboltoken")
+                        break
+            if not token and scrips:
+                token = scrips[0].get("symboltoken")
 
         if not token:
             return {"status": "failed", "error": "token_not_found", "symbol": symbol}
@@ -386,10 +405,19 @@ def get_angel_historical_data(
         search_resp = safe_parse_response(_smart_api.searchScrip("NSE", symbol))
         token = None
         if search_resp and is_api_success(search_resp):
-            for scrip in (search_resp.get("data") or []):
-                if scrip.get("tradingsymbol") == symbol:
+            scrips = search_resp.get("data") or []
+            eq_symbol = f"{symbol}-EQ"
+            for scrip in scrips:
+                if scrip.get("tradingsymbol") == eq_symbol:
                     token = scrip.get("symboltoken")
                     break
+            if not token:
+                for scrip in scrips:
+                    if scrip.get("tradingsymbol") == symbol:
+                        token = scrip.get("symboltoken")
+                        break
+            if not token and scrips:
+                token = scrips[0].get("symboltoken")
 
         if not token:
             return {"status": "failed", "error": "token_not_found", "symbol": symbol}
@@ -511,9 +539,12 @@ def get_screener_fundamentals(symbol: str) -> Dict[str, Any]:
             except (ValueError, TypeError):
                 return None
 
-        # Extract key ratios from the top ratios section
-        ratios_section = soup.find("section", id="top-ratios")
+        # Extract key ratios — try multiple selectors since Screener.in
+        # periodically changes their HTML structure.
         ratios = {}
+
+        # Strategy 1: section#top-ratios (original structure)
+        ratios_section = soup.find("section", id="top-ratios")
         if ratios_section:
             for li in ratios_section.find_all("li"):
                 name_tag  = li.find("span", class_="name")
@@ -521,7 +552,43 @@ def get_screener_fundamentals(symbol: str) -> Dict[str, Any]:
                 if name_tag and value_tag:
                     key = name_tag.get_text(strip=True).lower().replace(" ", "_").replace("/", "_")
                     val = value_tag.get_text(strip=True).replace(",", "").replace("%", "").strip()
-                    ratios[key] = val
+                    if val:
+                        ratios[key] = val
+
+        # Strategy 2: any ul/li with span.name + span.number (newer layout)
+        if not ratios:
+            for li in soup.find_all("li"):
+                name_tag  = li.find("span", class_="name")
+                value_tag = li.find("span", class_="number")
+                if name_tag and value_tag:
+                    key = name_tag.get_text(strip=True).lower().replace(" ", "_").replace("/", "_")
+                    val = value_tag.get_text(strip=True).replace(",", "").replace("%", "").strip()
+                    if val:
+                        ratios[key] = val
+
+        # Strategy 3: text-based label search as final fallback
+        if not ratios:
+            label_map = {
+                "stock_p_e": ["Stock P/E", "P/E Ratio", "PE Ratio"],
+                "return_on_equity": ["Return on equity", "ROE"],
+                "roce": ["ROCE", "Return on capital employed"],
+                "debt___equity": ["Debt to equity", "D/E"],
+                "market_cap": ["Market Cap", "Market Capitalization"],
+                "price_to_book_value": ["Price to Book", "P/B"],
+                "dividend_yield": ["Dividend Yield"],
+                "eps_in_rs": ["EPS", "Earnings per Share"],
+            }
+            for key, labels in label_map.items():
+                for label in labels:
+                    for li in soup.find_all("li"):
+                        text = li.get_text(" ", strip=True)
+                        if label.lower() in text.lower():
+                            match = re.search(r"[\d,]+\.?\d*", text.split(label)[-1])
+                            if match:
+                                ratios[key] = match.group().replace(",", "")
+                                break
+                    if key in ratios:
+                        break
 
         # Extract company name and sector
         company_name = ""
