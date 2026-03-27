@@ -828,7 +828,7 @@ def _render_sidebar():
         keys_present = all([
             os.getenv("ANGEL_API_KEY"),
             os.getenv("ANGEL_CLIENT_ID"),
-            os.getenv("ANTHROPIC_API_KEY"),
+            os.getenv("OPENAI_API_KEY"),
         ])
         env_colour = "#12A05C" if keys_present else "#D93025"
         env_label  = "ENV OK" if keys_present else "ENV MISSING"
@@ -1194,7 +1194,7 @@ def _render_landing():
         "ANGEL_CLIENT_ID":     os.getenv("ANGEL_CLIENT_ID", ""),
         "ANGEL_MPIN":          os.getenv("ANGEL_MPIN", ""),
         "ANGEL_TOTP_SECRET":   os.getenv("ANGEL_TOTP_SECRET", ""),
-        "ANTHROPIC_API_KEY":   os.getenv("ANTHROPIC_API_KEY", ""),
+        "OPENAI_API_KEY":   os.getenv("OPENAI_API_KEY", ""),
         "SERPER_API_KEY":      os.getenv("SERPER_API_KEY", ""),
     }
 
