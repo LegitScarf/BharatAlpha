@@ -10,7 +10,7 @@ crewai==0.86.0
 crewai-tools==0.76.0
 
 # ── LLM ──────────────────────────────────────────────────────
-anthropic==0.84.0
+openai>=1.0.0
 litellm>=1.44.22
 
 # ── Angel One SmartAPI ───────────────────────────────────────
@@ -40,3 +40,4 @@ pyyaml==6.0.3
 logzero==1.7.0
 pytz==2025.2
 python-dateutil==2.9.0.post0
+setuptools>=68.0.0
