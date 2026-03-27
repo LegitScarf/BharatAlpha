@@ -75,9 +75,9 @@ screen_universe:
 
 analyze_fundamentals:
   description: >
-    Fundamental analysis on the top 5 HIGH-PRIORITY candidates only
+    Fundamental analysis on the top 3 HIGH-PRIORITY candidates only
     (weight_tier=1 or priority=high from screen_universe).
-    Analyse exactly 5 stocks — no more.
+    Analyse exactly 3 stocks — no more.
 
     TOOL USAGE for each stock (one call per stock only):
     1. get_screener_fundamentals(symbol) — fetches P/E, P/B, ROE, ROCE,
@@ -118,7 +118,7 @@ analyze_fundamentals:
 
 analyze_technicals:
   description: >
-    Technical analysis for the top 5 stocks from analyze_fundamentals
+    Technical analysis for the top 3 stocks from analyze_fundamentals
     (those with highest fundamental_score).
 
     TOOL USAGE for each stock:
@@ -127,7 +127,7 @@ analyze_technicals:
 
     Compute: 20-day SMA, RSI(14), support/resistance.
     Assign technical_score 0.0-1.0. NEVER invent prices.
-    Analyse exactly 5 stocks — no more.
+    Analyse exactly 3 stocks — no more.
 
   expected_output: >
     JSON (keep under 1200 tokens):
@@ -158,7 +158,7 @@ analyze_technicals:
 
 assess_sentiment:
   description: >
-    Sentiment analysis for the same 5 stocks from analyze_fundamentals.
+    Sentiment analysis for the same 3 stocks from analyze_fundamentals.
 
     TOOL USAGE for each stock (2 calls max per stock):
     1. get_rss_news(symbol, company_name) — recent headlines only
@@ -166,7 +166,7 @@ assess_sentiment:
     Skip get_nse_corporate_actions to reduce token usage.
 
     Assign sentiment_score 0.0-1.0. NEVER fabricate news events.
-    Analyse exactly 5 stocks — no more.
+    Analyse exactly 3 stocks — no more.
 
   expected_output: >
     JSON (keep under 1000 tokens):

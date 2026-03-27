@@ -1,77 +1,79 @@
+```json
 {
   "task": "fundamental_analysis",
   "results": [
     {
-      "symbol": "RELIANCE",
-      "company": "Reliance Industries",
-      "sector": "Energy",
-      "pe_ratio": null,
-      "pb_ratio": null,
-      "roe": null,
-      "roce": null,
-      "debt_to_equity": null,
-      "revenue_growth_3yr": null,
-      "fundamental_score": 0.5,
-      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
-      "data_quality": "limited"
-    },
-    {
       "symbol": "TCS",
       "company": "Tata Consultancy Services",
       "sector": "IT",
-      "pe_ratio": null,
+      "pe_ratio": 18.7,
       "pb_ratio": null,
-      "roe": null,
-      "roce": null,
+      "roe": 52.4,
+      "roce": 64.6,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.5,
-      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
-      "data_quality": "limited"
+      "fundamental_score": 0.85,
+      "score_rationale": "Exceptional ROCE (64.6%) and ROE (52.4%) with reasonable P/E (18.7) indicate strong capital efficiency and profitability; premium valuation justified by quality.",
+      "data_quality": "partial"
     },
     {
       "symbol": "INFY",
-      "company": "Infosys",
+      "company": "Infosys Limited",
       "sector": "IT",
-      "pe_ratio": null,
+      "pe_ratio": 18.3,
       "pb_ratio": null,
-      "roe": null,
-      "roce": null,
+      "roe": 28.8,
+      "roce": 37.5,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.5,
-      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
-      "data_quality": "limited"
+      "fundamental_score": 0.75,
+      "score_rationale": "Good ROCE (37.5%) and moderate ROE (28.8%) with fair P/E (18.3) and solid dividend yield (3.31%) suggest balanced valuation and profitability.",
+      "data_quality": "partial"
+    },
+    {
+      "symbol": "WIPRO",
+      "company": "Wipro Limited",
+      "sector": "IT",
+      "pe_ratio": 15.9,
+      "pb_ratio": null,
+      "roe": 16.6,
+      "roce": 19.5,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.65,
+      "score_rationale": "Lowest P/E (15.9) among peers with highest dividend yield (5.47%), but weaker ROCE (19.5%) and ROE (16.6%) suggest moderate profitability.",
+      "data_quality": "partial"
     },
     {
       "symbol": "HDFCBANK",
-      "company": "HDFC Bank",
-      "sector": "Banking",
-      "pe_ratio": null,
+      "company": "HDFC Bank Limited",
+      "sector": "Financials",
+      "pe_ratio": 18.3,
       "pb_ratio": null,
-      "roe": null,
-      "roce": null,
+      "roe": 14.4,
+      "roce": 7.51,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.5,
-      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
-      "data_quality": "limited"
+      "fundamental_score": 0.60,
+      "score_rationale": "Banking sector with moderate P/E (18.3) but low ROCE (7.51%) and ROE (14.4%); valuation appears fair relative to sector profitability metrics.",
+      "data_quality": "partial"
     },
     {
       "symbol": "ICICIBANK",
-      "company": "ICICI Bank",
-      "sector": "Banking",
-      "pe_ratio": null,
+      "company": "ICICI Bank Limited",
+      "sector": "Financials",
+      "pe_ratio": 18.6,
       "pb_ratio": null,
-      "roe": null,
-      "roce": null,
+      "roe": 17.9,
+      "roce": 7.87,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.5,
-      "score_rationale": "Data unavailable from tool; cannot assess valuation or profitability metrics.",
-      "data_quality": "limited"
+      "fundamental_score": 0.62,
+      "score_rationale": "Banking sector with slightly higher ROE (17.9%) than HDFCBANK but similar low ROCE (7.87%); P/E (18.6) reflects sector dynamics.",
+      "data_quality": "partial"
     }
   ],
-  "top_picks_fundamental": [],
-  "confidence": 0.0
+  "top_picks_fundamental": ["TCS", "INFY", "WIPRO"],
+  "confidence": 0.78
 }
+```

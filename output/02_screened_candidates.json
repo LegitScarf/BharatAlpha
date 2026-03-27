@@ -1,188 +1,43 @@
+```json
 {
   "task": "screen_universe",
   "market_bias_applied": "neutral",
   "candidates": [
-    {
-      "symbol": "RELIANCE",
-      "company": "Reliance Industries",
-      "sector": "Energy",
-      "priority": "high",
-      "weight_tier": 1
-    },
-    {
-      "symbol": "TCS",
-      "company": "Tata Consultancy Services",
-      "sector": "IT",
-      "priority": "high",
-      "weight_tier": 1
-    },
-    {
-      "symbol": "INFY",
-      "company": "Infosys",
-      "sector": "IT",
-      "priority": "high",
-      "weight_tier": 1
-    },
-    {
-      "symbol": "HDFCBANK",
-      "company": "HDFC Bank",
-      "sector": "Banking",
-      "priority": "high",
-      "weight_tier": 1
-    },
-    {
-      "symbol": "ICICIBANK",
-      "company": "ICICI Bank",
-      "sector": "Banking",
-      "priority": "high",
-      "weight_tier": 1
-    },
-    {
-      "symbol": "MARUTI",
-      "company": "Maruti Suzuki",
-      "sector": "Auto",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "BAJAJFINSV",
-      "company": "Bajaj Finserv",
-      "sector": "Financials",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "NESTLEIND",
-      "company": "Nestle India",
-      "sector": "FMCG",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "BRITANNIA",
-      "company": "Britannia Industries",
-      "sector": "FMCG",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "SUNPHARMA",
-      "company": "Sun Pharmaceutical",
-      "sector": "Pharma",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "DRREDDY",
-      "company": "Dr. Reddy's Laboratories",
-      "sector": "Pharma",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "WIPRO",
-      "company": "Wipro",
-      "sector": "IT",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "KOTAKBANK",
-      "company": "Kotak Mahindra Bank",
-      "sector": "Banking",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "AXISBANK",
-      "company": "Axis Bank",
-      "sector": "Banking",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "SBILIFE",
-      "company": "SBI Life Insurance",
-      "sector": "Insurance",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "HCLTECH",
-      "company": "HCL Technologies",
-      "sector": "IT",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "BAJAJFINSV",
-      "company": "Bajaj Finance",
-      "sector": "Financials",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "TITAN",
-      "company": "Titan Company",
-      "sector": "Consumer",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "ASIANPAINT",
-      "company": "Asian Paints",
-      "sector": "Consumer",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "HINDUNILVR",
-      "company": "Hindustan Unilever",
-      "sector": "FMCG",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "CIPLA",
-      "company": "Cipla",
-      "sector": "Pharma",
-      "priority": "medium",
-      "weight_tier": 2
-    },
-    {
-      "symbol": "JSWSTEEL",
-      "company": "JSW Steel",
-      "sector": "Metals",
-      "priority": "medium",
-      "weight_tier": 3
-    },
-    {
-      "symbol": "TATASTEEL",
-      "company": "Tata Steel",
-      "sector": "Metals",
-      "priority": "medium",
-      "weight_tier": 3
-    },
-    {
-      "symbol": "BHARTIARTL",
-      "company": "Bharti Airtel",
-      "sector": "Telecom",
-      "priority": "medium",
-      "weight_tier": 3
-    }
+    {"symbol": "TCS", "company": "Tata Consultancy Services", "sector": "IT", "priority": "high", "weight_tier": 1},
+    {"symbol": "INFY", "company": "Infosys Limited", "sector": "IT", "priority": "high", "weight_tier": 1},
+    {"symbol": "WIPRO", "company": "Wipro Limited", "sector": "IT", "priority": "high", "weight_tier": 1},
+    {"symbol": "HDFCBANK", "company": "HDFC Bank Limited", "sector": "Financials", "priority": "high", "weight_tier": 1},
+    {"symbol": "ICICIBANK", "company": "ICICI Bank Limited", "sector": "Financials", "priority": "high", "weight_tier": 1},
+    {"symbol": "KOTAKBANK", "company": "Kotak Mahindra Bank", "sector": "Financials", "priority": "high", "weight_tier": 1},
+    {"symbol": "RELIANCE", "company": "Reliance Industries", "sector": "Energy", "priority": "high", "weight_tier": 1},
+    {"symbol": "NESTLEIND", "company": "Nestle India Limited", "sector": "FMCG", "priority": "high", "weight_tier": 1},
+    {"symbol": "HINDUNILVR", "company": "Hindustan Unilever Limited", "sector": "FMCG", "priority": "high", "weight_tier": 1},
+    {"symbol": "ASIANPAINT", "company": "Asian Paints Limited", "sector": "FMCG", "priority": "high", "weight_tier": 1},
+    {"symbol": "SUNPHARMA", "company": "Sun Pharmaceutical Industries", "sector": "Pharma", "priority": "high", "weight_tier": 1},
+    {"symbol": "MARUTI", "company": "Maruti Suzuki India Limited", "sector": "Auto", "priority": "medium", "weight_tier": 2},
+    {"symbol": "BAJAJFINSV", "company": "Bajaj Finserv Limited", "sector": "Financials", "priority": "medium", "weight_tier": 2},
+    {"symbol": "TITAN", "company": "Titan Company Limited", "sector": "Consumer", "priority": "medium", "weight_tier": 2},
+    {"symbol": "SBILIFE", "company": "SBI Life Insurance Company", "sector": "Financials", "priority": "medium", "weight_tier": 2},
+    {"symbol": "LTTS", "company": "L&T Technology Services", "sector": "IT", "priority": "medium", "weight_tier": 2},
+    {"symbol": "PAGEIND", "company": "Page Industries Limited", "sector": "Consumer", "priority": "medium", "weight_tier": 2},
+    {"symbol": "JSWSTEEL", "company": "JSW Steel Limited", "sector": "Metals", "priority": "medium", "weight_tier": 2},
+    {"symbol": "TATASTEEL", "company": "Tata Steel Limited", "sector": "Metals", "priority": "medium", "weight_tier": 2},
+    {"symbol": "HCLTECH", "company": "HCL Technologies Limited", "sector": "IT", "priority": "medium", "weight_tier": 2},
+    {"symbol": "BHARTIARTL", "company": "Bharti Airtel Limited", "sector": "Telecom", "priority": "medium", "weight_tier": 2},
+    {"symbol": "CIPLA", "company": "Cipla Limited", "sector": "Pharma", "priority": "medium", "weight_tier": 2},
+    {"symbol": "DRREDDY", "company": "Dr. Reddy's Laboratories", "sector": "Pharma", "priority": "medium", "weight_tier": 2}
   ],
   "sector_distribution": {
     "IT": 5,
-    "Banking": 4,
+    "Financials": 5,
     "FMCG": 3,
     "Pharma": 3,
-    "Financials": 2,
-    "Energy": 1,
-    "Auto": 1,
-    "Insurance": 1,
-    "Consumer": 2,
     "Metals": 2,
+    "Auto": 1,
+    "Consumer": 2,
+    "Energy": 1,
     "Telecom": 1
   },
-  "confidence": 0.72
+  "confidence": 0.82
 }
+```

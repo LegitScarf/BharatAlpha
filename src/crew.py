@@ -67,16 +67,16 @@ class BharatAlphaCrew():
 
     def _haiku(self) -> LLM:
         return LLM(
-            model="anthropic/claude-haiku-4-5-20251001",
-            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            model="gpt-4o-mini",
+            api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0.1,
             max_tokens=2048        # reduced to stay under rate limit
         )
 
     def _sonnet(self) -> LLM:
         return LLM(
-            model="anthropic/claude-sonnet-4-5",
-            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            model="gpt-4o",
+            api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0.2,
             max_tokens=4096        # reduced to stay under 30k TPM rate limit
         )
@@ -213,13 +213,15 @@ class BharatAlphaCrew():
     @task
     def analyze_technicals(self) -> Task:
         return Task(
-            config=self.tasks_config["analyze_technicals"]
+            config=self.tasks_config["analyze_technicals"],
+            async_execution=True
         )
 
     @task
     def assess_sentiment(self) -> Task:
         return Task(
-            config=self.tasks_config["assess_sentiment"]
+            config=self.tasks_config["assess_sentiment"],
+            async_execution=True
         )
 
     @task
@@ -249,10 +251,11 @@ class BharatAlphaCrew():
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
-            process=Process.sequential,
+            process=Process.hierarchical,  
+            manager_llm=self._haiku(),      
             verbose=True,
             memory=False,
-            max_rpm=8,             # throttle to ~8 LLM calls/min — prevents 429s
+            max_rpm=20,
             full_output=True,
             step_callback=self._step_callback,
             task_callback=self._task_callback
