@@ -7,6 +7,8 @@
 
 # ── Core framework ────────────────────────────────────────────
 setuptools>=68.0.0
+importlib-metadata>=4.0
+pkgutil-resolve-name
 crewai==0.86.0
 crewai-tools==0.76.0
 
