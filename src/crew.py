@@ -188,7 +188,6 @@ class BharatAlphaCrew():
             allow_delegation=False
         )
 
-    @agent
     def cio_manager_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["cio_manager_agent"],
