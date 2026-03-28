@@ -188,6 +188,15 @@ class BharatAlphaCrew():
             allow_delegation=False
         )
 
+    @agent
+    def cio_manager_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["cio_manager_agent"],
+            llm=self._sonnet(),
+            verbose=True,
+            allow_delegation=True
+        )
+
     # ─────────────────────────────────────────────
     #  TASKS
     # ─────────────────────────────────────────────
@@ -252,7 +261,7 @@ class BharatAlphaCrew():
             agents=self.agents,
             tasks=self.tasks,
             process=Process.hierarchical,  
-            manager_llm=self._haiku(),      
+            manager_agent=self.cio_manager_agent(),      
             verbose=True,
             memory=False,
             max_rpm=20,
