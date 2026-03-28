@@ -68,7 +68,7 @@ class BharatAlphaCrew():
     def _haiku(self) -> LLM:
         return LLM(
             model="gpt-4o-mini",
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=os.getenv("OPENAI_API_KEY", "").strip(),
             temperature=0.1,
             max_tokens=2048        # reduced to stay under rate limit
         )
@@ -76,7 +76,7 @@ class BharatAlphaCrew():
     def _sonnet(self) -> LLM:
         return LLM(
             model="gpt-4o",
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=os.getenv("OPENAI_API_KEY", "").strip(),
             temperature=0.2,
             max_tokens=4096        # reduced to stay under 30k TPM rate limit
         )
