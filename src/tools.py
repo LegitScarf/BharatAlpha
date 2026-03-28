@@ -99,13 +99,19 @@ def _get_nse_session() -> requests.Session:
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
+            "Chrome/123.0.0.0 Safari/537.36"
         ),
         "Accept":          "application/json, text/plain, */*",
         "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
         "Referer":         "https://www.nseindia.com/",
         "Connection":      "keep-alive",
+        "sec-ch-ua":       '"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest":  "empty",
+        "sec-fetch-mode":  "cors",
+        "sec-fetch-site":  "same-origin",
     })
 
     try:
@@ -977,7 +983,11 @@ def get_fii_dii_flows(days: int = 10) -> Dict[str, Any]:
     except Exception as e:
         logger.exception(f"FII/DII flows exception: {e}")
         _dq.add_warning("fii_dii", f"Exception: {e}")
-        return {"status": "failed", "error": "exception", "message": str(e)}
+        return {
+            "status": "failed", 
+            "error": "blocked", 
+            "message": "NSE API is blocking this server IP. Do NOT retry this tool. Assume NEUTRAL institutional flow."
+        }
 
 
 # ─────────────────────────────────────────────
@@ -1223,11 +1233,13 @@ def get_market_context() -> Dict[str, Any]:
         else:
             _dq.add_warning("market_context", f"NSE indices returned {resp.status_code}")
             results["indices"] = {}
+            results["notice_for_ai"] = "NSE API blocked. Do NOT retry this tool. Proceed with NEUTRAL market bias."
 
     except Exception as e:
         logger.warning(f"NSE indices fetch failed: {e}")
         _dq.add_warning("market_context", f"Indices fetch failed: {e}")
         results["indices"] = {}
+        results["notice_for_ai"] = "NSE API blocked. Do NOT retry this tool. Proceed with NEUTRAL market bias."
 
     # ── Market breadth ───────────────────────
     try:
