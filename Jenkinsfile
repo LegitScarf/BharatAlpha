@@ -4,7 +4,7 @@
 // 7-stage pipeline:
 //   1. Pre-Flight Check    — workspace, disk, Docker daemon
 //   2. Validate Env        — required credentials present
-//   3. API Connectivity    — Angel One auth + Anthropic ping
+//   3. API Connectivity    — Angel One auth + OpenAI ping
 //   4. Clean Workspace     — remove old images, containers
 //   5. Build Image         — docker build (multi-stage)
 //   6. Deploy Container    — docker run with volumes + logging
@@ -12,7 +12,7 @@
 //
 // Required Jenkins credentials (Secret Text):
 //   ANGEL_API_KEY, ANGEL_CLIENT_ID, ANGEL_MPIN, ANGEL_TOTP_SECRET
-//   ANTHROPIC_API_KEY, SERPER_API_KEY
+//   OPENAI_API_KEY, SERPER_API_KEY
 // ============================================================
 
 pipeline {
@@ -139,7 +139,7 @@ with open('$f') as fh:
                         string(credentialsId: 'ANGEL_CLIENT_ID',    variable: 'ANGEL_CLIENT_ID'),
                         string(credentialsId: 'ANGEL_MPIN',         variable: 'ANGEL_MPIN'),
                         string(credentialsId: 'ANGEL_TOTP_SECRET',  variable: 'ANGEL_TOTP_SECRET'),
-                        string(credentialsId: 'ANTHROPIC_API_KEY',  variable: 'ANTHROPIC_API_KEY'),
+                        string(credentialsId: 'OPENAI_API_KEY',     variable: 'OPENAI_API_KEY'),
                         string(credentialsId: 'SERPER_API_KEY',     variable: 'SERPER_API_KEY'),
                     ]) {
                         sh '''
@@ -159,7 +159,7 @@ with open('$f') as fh:
                             check_var "$ANGEL_CLIENT_ID"   "ANGEL_CLIENT_ID"
                             check_var "$ANGEL_MPIN"        "ANGEL_MPIN"
                             check_var "$ANGEL_TOTP_SECRET" "ANGEL_TOTP_SECRET"
-                            check_var "$ANTHROPIC_API_KEY" "ANTHROPIC_API_KEY"
+                            check_var "$OPENAI_API_KEY"    "OPENAI_API_KEY"
                             check_var "$SERPER_API_KEY"    "SERPER_API_KEY"
 
                             if [ "$MISSING" -eq 1 ]; then
@@ -193,7 +193,7 @@ with open('$f') as fh:
                         string(credentialsId: 'ANGEL_CLIENT_ID',    variable: 'ANGEL_CLIENT_ID'),
                         string(credentialsId: 'ANGEL_MPIN',         variable: 'ANGEL_MPIN'),
                         string(credentialsId: 'ANGEL_TOTP_SECRET',  variable: 'ANGEL_TOTP_SECRET'),
-                        string(credentialsId: 'ANTHROPIC_API_KEY',  variable: 'ANTHROPIC_API_KEY'),
+                        string(credentialsId: 'OPENAI_API_KEY',     variable: 'OPENAI_API_KEY'),
                     ]) {
                         // Write the Python auth script to a temp file first.
                         // This sidesteps the Groovy/bash/python triple-quoting
@@ -350,7 +350,7 @@ except Exception as e:
                         docker run --rm --entrypoint bash ${IMAGE_NAME}:${IMAGE_TAG} -c "
                             pip show streamlit | grep -q 'Name: streamlit' && echo '  ✓ streamlit'  || (echo '  ✗ streamlit missing'  && exit 1)
                             pip show crewai    | grep -q 'Name: crewai'    && echo '  ✓ crewai'     || (echo '  ✗ crewai missing'     && exit 1)
-                            pip show anthropic | grep -q 'Name: anthropic' && echo '  ✓ anthropic'  || (echo '  ✗ anthropic missing'  && exit 1)
+                            pip show openai    | grep -q 'Name: openai'    && echo '  ✓ openai'     || (echo '  ✗ openai missing'     && exit 1)
                             pip show pandas    | grep -q 'Name: pandas'    && echo '  ✓ pandas'     || (echo '  ✗ pandas missing'     && exit 1)
                             echo '  ✓ All packages verified'
                         "
@@ -368,7 +368,7 @@ except Exception as e:
                         string(credentialsId: 'ANGEL_CLIENT_ID',    variable: 'ANGEL_CLIENT_ID'),
                         string(credentialsId: 'ANGEL_MPIN',         variable: 'ANGEL_MPIN'),
                         string(credentialsId: 'ANGEL_TOTP_SECRET',  variable: 'ANGEL_TOTP_SECRET'),
-                        string(credentialsId: 'ANTHROPIC_API_KEY',  variable: 'ANTHROPIC_API_KEY'),
+                        string(credentialsId: 'OPENAI_API_KEY',     variable: 'OPENAI_API_KEY'),
                         string(credentialsId: 'SERPER_API_KEY',     variable: 'SERPER_API_KEY'),
                     ]) {
                         sh """
