@@ -1,0 +1,30 @@
+```json
+{
+  "task": "sentiment_analysis",
+  "results": [
+    {
+      "symbol": "RELIANCE",
+      "sentiment_score": 0.4,
+      "key_signals": ["Recent net sales growth of 11.08% YoY", "5% drop in share price"],
+      "upcoming_catalysts": [],
+      "score_rationale": "The positive sales growth is overshadowed by the recent decline in share price and negative sentiment surrounding market performance."
+    },
+    {
+      "symbol": "TCS",
+      "sentiment_score": 0.3,
+      "key_signals": ["Shares hit a 52-week low", "Significant selloff in IT stocks"],
+      "upcoming_catalysts": [],
+      "score_rationale": "The stock is under pressure from market conditions and negative sentiment, despite potential opportunities highlighted by analysts."
+    },
+    {
+      "symbol": "INFY",
+      "sentiment_score": 0.5,
+      "key_signals": ["Positive outlook due to AI deal boost", "Recent jump in share price after guidance hike"],
+      "upcoming_catalysts": [],
+      "score_rationale": "The mixed signals of a positive outlook and recent price drops reflect a cautious sentiment, balancing between growth potential and market volatility."
+    }
+  ],
+  "overall_market_sentiment": "neutral",
+  "confidence": 0.5
+}
+```

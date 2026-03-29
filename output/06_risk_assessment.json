@@ -1,0 +1,35 @@
+```json
+{
+  "task": "risk_assessment",
+  "results": [
+    {
+      "symbol": "RELIANCE",
+      "promoter_pledge_pct": null,
+      "pledge_flag": false,
+      "risk_flags": ["5% drop in share price"],
+      "risk_score": 0.6,
+      "recommendation": "caution"
+    },
+    {
+      "symbol": "TCS",
+      "promoter_pledge_pct": null,
+      "pledge_flag": false,
+      "risk_flags": ["Shares hit a 52-week low", "Significant selloff in IT stocks"],
+      "risk_score": 0.7,
+      "recommendation": "caution"
+    },
+    {
+      "symbol": "INFY",
+      "promoter_pledge_pct": null,
+      "pledge_flag": false,
+      "risk_flags": ["Positive outlook due to AI deal boost"],
+      "risk_score": 0.4,
+      "recommendation": "include"
+    }
+  ],
+  "excluded_stocks": [],
+  "confidence": 0.5
+}
+```
+
+This assessment is based on the fundamental and sentiment analysis provided. The lack of promoter pledge data limits the accuracy of the risk scores, and the confidence level reflects this limitation.

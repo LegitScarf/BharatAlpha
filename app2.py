@@ -571,7 +571,17 @@ def _load_json(filename: str) -> Optional[dict]:
     path = OUTPUT_DIR / filename
     if path.exists():
         try:
-            return json.loads(path.read_text())
+            text = path.read_text().strip()
+            # Extract JSON block to ignore markdown codeblock backticks and extraneous text
+            if "{" in text and "}" in text:
+                start = text.find("{")
+                end = text.rfind("}") + 1
+                text = text[start:end]
+            elif "[" in text and "]" in text:
+                start = text.find("[")
+                end = text.rfind("]") + 1
+                text = text[start:end]
+            return json.loads(text)
         except Exception:
             return None
     return None

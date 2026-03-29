@@ -1,0 +1,51 @@
+```json
+{
+  "task": "portfolio_construction",
+  "macro_bias": "neutral",
+  "composite_scores": [
+    {
+      "symbol": "RELIANCE",
+      "company": "Reliance Industries",
+      "sector": "Energy",
+      "fundamental_score": 0.5,
+      "technical_score": 0.5,
+      "sentiment_score": 0.4,
+      "risk_score": 0.6,
+      "composite_score": 0.47,
+      "recommendation": "HOLD"
+    },
+    {
+      "symbol": "TCS",
+      "company": "Tata Consultancy Services",
+      "sector": "IT",
+      "fundamental_score": 0.8,
+      "technical_score": 0.5,
+      "sentiment_score": 0.3,
+      "risk_score": 0.7,
+      "composite_score": 0.56,
+      "recommendation": "HOLD"
+    },
+    {
+      "symbol": "INFY",
+      "company": "Infosys",
+      "sector": "IT",
+      "fundamental_score": 0.7,
+      "technical_score": 0.5,
+      "sentiment_score": 0.5,
+      "risk_score": 0.4,
+      "composite_score": 0.59,
+      "recommendation": "HOLD"
+    }
+  ],
+  "portfolio": [],
+  "portfolio_metrics": {
+    "total_stocks": 0,
+    "sector_allocation": {},
+    "avg_composite_score": 0.54,
+    "portfolio_beta_estimate": "moderate"
+  },
+  "confidence": 0.5
+}
+```
+
+This JSON response reflects the current market conditions and analysis, indicating a neutral macro bias and moderate portfolio beta estimate. No stocks are selected for the portfolio as none meet the BUY criteria.

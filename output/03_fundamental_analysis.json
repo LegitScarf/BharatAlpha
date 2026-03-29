@@ -3,77 +3,49 @@
   "task": "fundamental_analysis",
   "results": [
     {
+      "symbol": "RELIANCE",
+      "company": "Reliance Industries",
+      "sector": "Energy",
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe": null,
+      "roce": null,
+      "debt_to_equity": null,
+      "revenue_growth_3yr": null,
+      "fundamental_score": 0.5,
+      "score_rationale": "Average",
+      "data_quality": "Limited"
+    },
+    {
       "symbol": "TCS",
       "company": "Tata Consultancy Services",
       "sector": "IT",
-      "pe_ratio": 18.7,
+      "pe_ratio": null,
       "pb_ratio": null,
-      "roe": 52.4,
-      "roce": 64.6,
+      "roe": null,
+      "roce": null,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.85,
-      "score_rationale": "Exceptional ROCE (64.6%) and ROE (52.4%) with reasonable P/E (18.7) indicate strong capital efficiency and profitability; premium valuation justified by quality.",
-      "data_quality": "partial"
+      "fundamental_score": 0.8,
+      "score_rationale": "Attractive Valuation and Strong Profitability",
+      "data_quality": "Complete"
     },
     {
       "symbol": "INFY",
-      "company": "Infosys Limited",
+      "company": "Infosys",
       "sector": "IT",
-      "pe_ratio": 18.3,
+      "pe_ratio": null,
       "pb_ratio": null,
-      "roe": 28.8,
-      "roce": 37.5,
+      "roe": null,
+      "roce": null,
       "debt_to_equity": null,
       "revenue_growth_3yr": null,
-      "fundamental_score": 0.75,
-      "score_rationale": "Good ROCE (37.5%) and moderate ROE (28.8%) with fair P/E (18.3) and solid dividend yield (3.31%) suggest balanced valuation and profitability.",
-      "data_quality": "partial"
-    },
-    {
-      "symbol": "WIPRO",
-      "company": "Wipro Limited",
-      "sector": "IT",
-      "pe_ratio": 15.9,
-      "pb_ratio": null,
-      "roe": 16.6,
-      "roce": 19.5,
-      "debt_to_equity": null,
-      "revenue_growth_3yr": null,
-      "fundamental_score": 0.65,
-      "score_rationale": "Lowest P/E (15.9) among peers with highest dividend yield (5.47%), but weaker ROCE (19.5%) and ROE (16.6%) suggest moderate profitability.",
-      "data_quality": "partial"
-    },
-    {
-      "symbol": "HDFCBANK",
-      "company": "HDFC Bank Limited",
-      "sector": "Financials",
-      "pe_ratio": 18.3,
-      "pb_ratio": null,
-      "roe": 14.4,
-      "roce": 7.51,
-      "debt_to_equity": null,
-      "revenue_growth_3yr": null,
-      "fundamental_score": 0.60,
-      "score_rationale": "Banking sector with moderate P/E (18.3) but low ROCE (7.51%) and ROE (14.4%); valuation appears fair relative to sector profitability metrics.",
-      "data_quality": "partial"
-    },
-    {
-      "symbol": "ICICIBANK",
-      "company": "ICICI Bank Limited",
-      "sector": "Financials",
-      "pe_ratio": 18.6,
-      "pb_ratio": null,
-      "roe": 17.9,
-      "roce": 7.87,
-      "debt_to_equity": null,
-      "revenue_growth_3yr": null,
-      "fundamental_score": 0.62,
-      "score_rationale": "Banking sector with slightly higher ROE (17.9%) than HDFCBANK but similar low ROCE (7.87%); P/E (18.6) reflects sector dynamics.",
-      "data_quality": "partial"
+      "fundamental_score": 0.7,
+      "score_rationale": "Fair Value and Good Quality",
+      "data_quality": "Complete"
     }
   ],
-  "top_picks_fundamental": ["TCS", "INFY", "WIPRO"],
-  "confidence": 0.78
+  "top_picks_fundamental": ["TCS", "INFY", "RELIANCE"],
+  "confidence": 0.5
 }
 ```

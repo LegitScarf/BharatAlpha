@@ -1,66 +1,44 @@
+```json
 {
   "task": "technical_analysis",
   "results": [
     {
-      "symbol": "RELIANCE",
-      "current_price": null,
-      "above_50dma": null,
-      "above_200dma": null,
-      "rsi_14": null,
-      "trend_direction": "sideways",
-      "support": null,
-      "resistance": null,
-      "technical_score": 0.0,
-      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
-    },
-    {
       "symbol": "TCS",
-      "current_price": null,
-      "above_50dma": null,
-      "above_200dma": null,
-      "rsi_14": null,
+      "current_price": 2389.8,
+      "above_50dma": false,
+      "above_200dma": false,
+      "rsi_14": 50,
       "trend_direction": "sideways",
-      "support": null,
-      "resistance": null,
-      "technical_score": 0.0,
-      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+      "support": 2377.4,
+      "resistance": 3225.3,
+      "technical_score": 0.5,
+      "score_rationale": "Neutral RSI and price below moving averages indicate sideways trend."
     },
     {
       "symbol": "INFY",
-      "current_price": null,
-      "above_50dma": null,
-      "above_200dma": null,
-      "rsi_14": null,
+      "current_price": 1269.7,
+      "above_50dma": false,
+      "above_200dma": false,
+      "rsi_14": 50,
       "trend_direction": "sideways",
-      "support": null,
-      "resistance": null,
-      "technical_score": 0.0,
-      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+      "support": 1220.8,
+      "resistance": 1656.0,
+      "technical_score": 0.5,
+      "score_rationale": "Neutral RSI and price below moving averages indicate sideways trend."
     },
     {
-      "symbol": "HDFCBANK",
-      "current_price": null,
-      "above_50dma": null,
-      "above_200dma": null,
-      "rsi_14": null,
+      "symbol": "RELIANCE",
+      "current_price": 1348.1,
+      "above_50dma": false,
+      "above_200dma": false,
+      "rsi_14": 50,
       "trend_direction": "sideways",
-      "support": null,
-      "resistance": null,
-      "technical_score": 0.0,
-      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
-    },
-    {
-      "symbol": "ICICIBANK",
-      "current_price": null,
-      "above_50dma": null,
-      "above_200dma": null,
-      "rsi_14": null,
-      "trend_direction": "sideways",
-      "support": null,
-      "resistance": null,
-      "technical_score": 0.0,
-      "score_rationale": "API authentication failed; unable to fetch historical OHLCV data or compute technical indicators."
+      "support": 1348.1,
+      "resistance": 1468.7,
+      "technical_score": 0.5,
+      "score_rationale": "Neutral RSI and price below moving averages indicate sideways trend."
     }
   ],
-  "confidence": 0.0
+  "confidence": 0.5
 }
+```
