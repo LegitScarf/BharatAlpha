@@ -34,6 +34,7 @@ scipy==1.17.1
 
 # ── Streamlit frontend ────────────────────────────────────────
 streamlit==1.54.0
+plotly==5.28.0
 
 # ── Config & environment ──────────────────────────────────────
 python-dotenv==1.2.1
