@@ -520,10 +520,13 @@ def _load_json(filename: str) -> Optional[dict]:
     return None
 
 
-def _load_report() -> Optional[str]:
-    path = OUTPUT_DIR / "08_research_report.md"
+def _load_report_json() -> Optional[dict]:
+    path = OUTPUT_DIR / "08_research_report.json"
     if path.exists():
-        return path.read_text()
+        try:
+            return json.loads(path.read_text())
+        except Exception:
+            return None
     return None
 
 
@@ -1184,9 +1187,9 @@ def _render_dashboard():
 # ─────────────────────────────────────────────
 
 def _render_report():
-    report = _load_report()
+    report_data = _load_report_json()
 
-    if not report:
+    if not report_data:
         st.markdown("""
         <div style="text-align:center;padding:4rem 0;color:#BBB;
                     font-family:'IBM Plex Mono',monospace;font-size:0.85rem;">
@@ -1199,10 +1202,10 @@ def _render_report():
     col1, col2 = st.columns([8, 2])
     with col2:
         st.download_button(
-            label="↓ Download .md",
-            data=report,
-            file_name=f"bharatalpha_report_{datetime.now().strftime('%Y%m%d_%H%M')}.md",
-            mime="text/markdown",
+            label="↓ Download JSON",
+            data=json.dumps(report_data, indent=2),
+            file_name=f"bharatalpha_report_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
+            mime="application/json",
             use_container_width=True
         )
 
@@ -1244,7 +1247,7 @@ def _render_report():
         color: #888 !important;
         margin-top: 1rem !important;
     }
-    .report-body p {
+    .report-body p, .report-body li {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-size: 0.9rem !important;
         line-height: 1.75 !important;
@@ -1275,7 +1278,71 @@ def _render_report():
     <div class="report-body">
     """, unsafe_allow_html=True)
 
-    st.markdown(report)
+    st.markdown("<h1>BharatAlpha Equity Research Report</h1>", unsafe_allow_html=True)
+    
+    st.markdown("<h2>Executive Summary</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p>{report_data.get('executive_summary', '')}</p>", unsafe_allow_html=True)
+    
+    st.markdown("<h2>Market Backdrop</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p>{report_data.get('market_backdrop', '')}</p>", unsafe_allow_html=True)
+    
+    st.markdown("<h2>Portfolio Recommendations</h2>", unsafe_allow_html=True)
+    recs = report_data.get("portfolio_recommendations", [])
+    for rec in recs:
+        sym = rec.get("symbol", "")
+        company = rec.get("company", "")
+        action = rec.get("action", "")
+        target = rec.get("target", "")
+        st.markdown(f"<h3>{company} ({sym}) — {action} | Target: ₹{target}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<p><strong>Thesis:</strong> {rec.get('thesis', '')}</p>", unsafe_allow_html=True)
+        st.markdown(f"<h4>Key Metrics</h4>", unsafe_allow_html=True)
+        st.markdown(f"<p><strong>Fundamentals:</strong> {rec.get('fundamentals', '')}<br><strong>Technicals:</strong> {rec.get('technicals', '')}</p>", unsafe_allow_html=True)
+        
+        st.markdown(f"<h4>Risks</h4>", unsafe_allow_html=True)
+        for risk in rec.get("risks", []):
+            st.markdown(f"<li>{risk}</li>", unsafe_allow_html=True)
+            
+        # Add Candlestick Chart using Plotly
+        if sym:
+            with st.spinner(f"Loading live chart for {sym}..."):
+                from src.tools import get_angel_historical_data
+                import pandas as pd
+                import plotly.graph_objects as go
+                
+                hist = get_angel_historical_data.func(sym, days=60)
+                if hist and hist.get("status") == "success" and hist.get("data"):
+                    df = pd.DataFrame(hist["data"])
+                    df["date"] = pd.to_datetime(df["date"])
+                    
+                    fig = go.Figure(data=[go.Candlestick(
+                        x=df['date'],
+                        open=df['open'],
+                        high=df['high'],
+                        low=df['low'],
+                        close=df['close'],
+                        name=sym
+                    )])
+                    
+                    fig.update_layout(
+                        title=f"{sym} - 60 Day Technical View",
+                        xaxis_rangeslider_visible=False,
+                        height=400,
+                        margin=dict(l=0, r=0, t=40, b=0),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font=dict(family="IBM Plex Mono")
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning(f"Live chart data currently unavailable for {sym}.")
+
+    overview = report_data.get("portfolio_overview", {})
+    if overview:
+        st.markdown("<h2>Portfolio Overview</h2>", unsafe_allow_html=True)
+        st.markdown(f"<p><strong>Total Stocks:</strong> {overview.get('Total Stocks', '')}</p>", unsafe_allow_html=True)
+        st.markdown("<h4>Sector Allocations</h4>", unsafe_allow_html=True)
+        for sec, alloc in overview.get("Sector Allocations", {}).items():
+            st.markdown(f"<li>{sec}: {alloc}</li>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
